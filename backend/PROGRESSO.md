@@ -7,7 +7,7 @@
 
 ## 📋 STATUS GERAL DO PROJETO
 
-**Status Atual:** 🟢 INICIADO - Fase de Planejamento e Análise
+**Status Atual:** 🟢 EM PROGRESSO - Fase de Documentação de Arquitetura
 
 ---
 
@@ -31,11 +31,34 @@
   - Socket.io (comunicação real-time)
   - Spree (marketplace/delivery)
 
+#### 1.2 - Análise de Repositórios de Referência ✅
+- ✅ **Traccar analisado**: Padrões de eventos, rastreamento GPS, tempo real
+  - Pipeline de processamento (Chain of Responsibility)
+  - WebSocket com Listener Pattern
+  - Cache em grafo para queries rápidas
+  - Event detection baseado em transições de estado
+
+- ✅ **Kill Bill analisado**: Controle transacional, idempotência, webhooks
+  - State Machine para consistência
+  - GlobalLocker para operações distribuídas
+  - External Keys para idempotência
+  - Janitor Pattern para reconciliação
+  - Eventos atômicos (postFromTransaction)
+
+- ✅ **Fineract analisado**: Ledger financeiro, double-entry, auditoria
+  - Double-Entry Bookkeeping
+  - Running Balance assíncrono
+  - Tabelas de histórico para auditoria
+  - Imutabilidade via reversões
+  - GL Closure para compliance
+
+**Documento gerado:** `00-ANALISE-REPOSITORIOS.md`
+
 ---
 
 ## 🚧 TAREFA EM ANDAMENTO
 
-**Nenhuma tarefa em execução no momento.**
+**Próximo:** Criar documentação detalhada dos itens D e E (prioridades do PROMPT.md)
 
 ---
 
@@ -103,13 +126,19 @@
 
 ## 📚 DOCUMENTOS GERADOS
 
-*Nenhum documento gerado ainda.*
+1. **PROGRESSO.md** - Sistema de controle de progresso
+2. **00-ANALISE-REPOSITORIOS.md** - Consolidação de insights dos repositórios de referência
+   - Padrões de Traccar (eventos, tempo real)
+   - Padrões de Kill Bill (transacional, idempotência)
+   - Padrões de Fineract (ledger, auditoria)
+   - Decisões de arquitetura derivadas
+   - Checklist de implementação
 
 ---
 
 ## 🔄 HISTÓRICO DE COMMITS
 
-*Aguardando primeiro commit...*
+1. **591e5e12** - 📝 Inicialização do projeto - Sistema de controle de progresso
 
 ---
 
@@ -130,9 +159,37 @@
 
 ## 💡 DECISÕES DE ARQUITETURA
 
-*Aguardando análise dos repositórios de referência.*
+### Controle Transacional - Accept Ride
+**Abordagem escolhida:** Híbrida (PostgreSQL SELECT FOR UPDATE + Redis Lock)
+- Lock distribuído via Redis (previne contenção)
+- Lock pessimista no banco (garante consistência)
+- Idempotency Key obrigatória em todas requisições
+- Eventos atômicos (mesma transação)
+
+### Pagamentos Pix
+**Estratégia:** Webhook transacional + Janitor
+- Persistir todos webhooks recebidos
+- Deduplicação por txid + e2eId
+- Aplicar efeito financeiro atomicamente
+- Job de reconciliação para webhooks perdidos
+- Job de expiração para cobranças não pagas
+
+### Ledger Financeiro
+**Modelo:** Double-Entry Bookkeeping (inspirado em Fineract)
+- Journal entries imutáveis
+- Reversões via novos registros invertidos
+- Running balance calculado assincronamente
+- Tabelas de histórico para auditoria
+- Chart of Accounts específico para mobilidade
+
+### Tempo Real
+**Arquitetura:** WebSocket + Redis Pub/Sub
+- Pipeline de processamento de eventos
+- Cache apenas de corridas ativas
+- Broadcast via Redis para múltiplas instâncias
+- Event detection baseado em transições de estado
 
 ---
 
-**Última Atualização:** 14/12/2024 - Inicialização do projeto
-**Próximo Passo:** Iniciar análise dos repositórios de referência (Traccar, Kill Bill, Fineract)
+**Última Atualização:** 14/12/2024 - Análise de repositórios concluída
+**Próximo Passo:** Criar documentação detalhada dos itens D (Accept Ride) e E (Pix Webhook)
