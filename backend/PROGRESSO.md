@@ -54,11 +54,40 @@
 
 **Documento gerado:** `00-ANALISE-REPOSITORIOS.md`
 
+#### 1.3 - Documentação de Arquitetura Prioritária ✅
+
+- ✅ **Item D - Controle Transacional Accept Ride** (PRIORIDADE 1)
+  - 3 abordagens de concorrência analisadas
+  - Abordagem híbrida escolhida (Redis Lock + PostgreSQL FOR UPDATE)
+  - Esquema de dados completo (rides, ride_accept_attempts, ride_offers)
+  - Pseudocódigo completo do endpoint /rides/{id}/accept
+  - Estratégia de idempotência com AcceptIdempotencyKey
+  - Eventos realtime (ride.accepted, offer.canceled)
+  - Casos de borda documentados
+  - Testes de concorrência especificados
+
+- ✅ **Item E - Pix Efí + Webhook Transacional** (PRIORIDADE 1)
+  - Fluxo completo de pagamento Pix Cob documentado
+  - Integração com API Efí (OAuth 2.0 + mTLS)
+  - Modelo de dados (payment_intents, pix_charges, webhook_events, financial_events)
+  - Pseudocódigo de criação de cobrança
+  - Handler de webhook transacional completo
+  - Deduplicação por e2eId (End-to-End ID)
+  - Validação de autenticidade (mTLS + IP whitelist)
+  - Job de expiração de cobranças
+  - Janitor para reconciliação de webhooks perdidos
+  - Aplicação ao ledger financeiro
+  - Monitoramento e alertas especificados
+
+**Documentos gerados:**
+- `D-ACCEPT-RIDE-TRANSACIONAL.md` (Item D do PROMPT.md)
+- `E-PIX-WEBHOOK-TRANSACIONAL.md` (Item E do PROMPT.md)
+
 ---
 
 ## 🚧 TAREFA EM ANDAMENTO
 
-**Próximo:** Criar documentação detalhada dos itens D e E (prioridades do PROMPT.md)
+**Próximo:** Criar modelo de domínio completo (itens A, B, C)
 
 ---
 
@@ -134,11 +163,26 @@
    - Decisões de arquitetura derivadas
    - Checklist de implementação
 
+3. **D-ACCEPT-RIDE-TRANSACIONAL.md** - Item D do PROMPT (PRIORIDADE 1)
+   - 3 abordagens de concorrência comparadas
+   - Pseudocódigo completo em Python/FastAPI
+   - Esquemas de tabelas PostgreSQL
+   - Estratégia de idempotência
+   - Casos de borda e testes
+
+4. **E-PIX-WEBHOOK-TRANSACIONAL.md** - Item E do PROMPT (PRIORIDADE 1)
+   - Fluxo completo Pix Cob com diagramas Mermaid
+   - Integração com Efí (API v2)
+   - Pseudocódigo de webhook handler
+   - Deduplicação e reconciliação
+   - Jobs de expiração e Janitor
+
 ---
 
 ## 🔄 HISTÓRICO DE COMMITS
 
 1. **591e5e12** - 📝 Inicialização do projeto - Sistema de controle de progresso
+2. **d5976e09** - 📊 Análise completa dos repositórios de referência
 
 ---
 
@@ -191,5 +235,5 @@
 
 ---
 
-**Última Atualização:** 14/12/2024 - Análise de repositórios concluída
-**Próximo Passo:** Criar documentação detalhada dos itens D (Accept Ride) e E (Pix Webhook)
+**Última Atualização:** 14/12/2024 - Itens D e E (prioridades) concluídos
+**Próximo Passo:** Criar modelo de domínio completo (itens A, B, C)
