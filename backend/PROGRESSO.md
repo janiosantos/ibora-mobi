@@ -83,11 +83,45 @@
 - `D-ACCEPT-RIDE-TRANSACIONAL.md` (Item D do PROMPT.md)
 - `E-PIX-WEBHOOK-TRANSACIONAL.md` (Item E do PROMPT.md)
 
+#### 1.4 - Modelo de Domínio Completo ✅
+
+- ✅ **Item A - Modelo de Domínio**
+  - 15 entidades principais definidas (Passenger, Driver, Vehicle, Ride, etc.)
+  - Esquemas SQL completos com campos, tipos, constraints
+  - Relacionamentos documentados (Foreign Keys)
+  - Índices para performance especificados
+  - Diagrama ER de relacionamentos
+
+- ✅ **Item B - Invariantes do Sistema**
+  - 8 invariantes críticos documentados
+  - Unicidade de aceite de corrida
+  - Idempotência de pagamentos
+  - Imutabilidade do ledger (append-only)
+  - Balanceamento double-entry
+  - Saldo do motorista não negativo
+  - Webhook não aplica efeito duplicado
+  - Driver com apenas 1 corrida ativa
+  - Timestamps consistentes
+  - Queries de validação SQL para cada invariante
+  - Triggers e constraints no banco
+
+- ✅ **Item C - Máquina de Estados da Corrida**
+  - 12 estados definidos (REQUESTED → PAID)
+  - Diagrama Mermaid com todas transições
+  - Guard conditions para cada transição
+  - Eventos emitidos em cada mudança de estado
+  - Estados finais: PAID, CANCELED, EXPIRED, PAYMENT_EXPIRED
+  - Validações de transição em Python
+  - Ações e efeitos colaterais documentados
+
+**Documento gerado:**
+- `A-B-C-MODELO-DOMINIO.md` (Itens A, B, C do PROMPT.md)
+
 ---
 
 ## 🚧 TAREFA EM ANDAMENTO
 
-**Próximo:** Criar modelo de domínio completo (itens A, B, C)
+**Próximo:** Criar documentação do Ledger financeiro (item F)
 
 ---
 
@@ -177,12 +211,19 @@
    - Deduplicação e reconciliação
    - Jobs de expiração e Janitor
 
+5. **A-B-C-MODELO-DOMINIO.md** - Itens A, B, C do PROMPT
+   - 15 entidades com esquemas SQL completos
+   - 8 invariantes do sistema com validações
+   - Máquina de estados com 12 estados e diagrama Mermaid
+   - Relacionamentos e índices documentados
+
 ---
 
 ## 🔄 HISTÓRICO DE COMMITS
 
 1. **591e5e12** - 📝 Inicialização do projeto - Sistema de controle de progresso
 2. **d5976e09** - 📊 Análise completa dos repositórios de referência
+3. **bc926845** - 🎯 Documentação completa dos itens prioritários D e E
 
 ---
 
@@ -235,5 +276,5 @@
 
 ---
 
-**Última Atualização:** 14/12/2024 - Itens D e E (prioridades) concluídos
-**Próximo Passo:** Criar modelo de domínio completo (itens A, B, C)
+**Última Atualização:** 14/12/2024 - Modelo de domínio completo (itens A, B, C)
+**Próximo Passo:** Criar documentação do Ledger financeiro (item F)
