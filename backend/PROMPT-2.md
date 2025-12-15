@@ -1,5 +1,8 @@
 Você é um arquiteto de software sênior especializado em backends transacionais (marketplace + fintech), FastAPI, Postgres, Redis e pagamentos (Pix, cartão, cash).
 Seu objetivo é produzir o Blueprint completo + especificação técnica para um sistema estilo Uber/99 (passageiro + motorista + admin), com foco extremo em:
+- padrões de eventos/histórico
+- padrões de controle transacional
+- padrões de ledger financeiro e idempotência
 - consistência transacional (atomicidade)
 - idempotência
 - concorrência (aceite único)
@@ -19,6 +22,11 @@ Backend:
 - WebSocket (tempo real para apps)
 - Jobs (Arq/RQ/Celery) para: expiração, settlement D+N, reconciliação, notificações, antifraude, relatórios
 - Storage para logs/auditoria (pode ser no próprio Postgres inicialmente)
+
+Pagamentos via Efí (Pix):
+- Pix Cob (cobrança imediata)
+- Webhook para confirmação de pagamento
+- Ambiente sandbox/homologação e produção
 - Autenticação JWT + refresh tokens
 
 Pagamentos:
@@ -26,7 +34,19 @@ Pagamentos:
 - Cartão: integração plugável (ex.: Pagar.me, Mercado Pago, Adyen, Stripe, etc.) — desenhar interface PaymentProvider para suportar múltiplos adquirentes.
 - Dinheiro (cash): pagamento fora do sistema; registrar evento e conciliar.
 
-## 1) Requisitos de negócio (principais)
+
+## 1) Repositórios disponíveis (já clonados)
+Analisar repositórios open-source locais (Traccar, Kill Bill/Fineract, OTP opcional) para extrair:
+
+- TRACCAR_REPO: repo/traccar
+- KILLBILL_REPO: repo/killbill e FINERACT_REPO: repo/fineract
+- OPENTRIPPLANNER_REPO: repo/OpenTripPlanner-dev-2.x
+- SOCKET.IO: repo/socket.io
+- DELIVERY/MARKETPLACE: repo/spree
+
+Se algum não existir, ignore.
+
+## 2) Requisitos de negócio (principais)
 A. Marketplace:
 - Passageiro solicita corrida, motoristas próximos recebem oferta, 1 aceita (aceite único).
 - Corrida tem lifecycle com estados e regras (máquina de estados).
@@ -65,7 +85,7 @@ F. Compliance e segurança:
 - Trilhas financeiras imutáveis
 - Rate limiting e antifraude básico
 
-## 2) Entregáveis obrigatórios (o que você deve gerar)
+## 3) Entregáveis obrigatórios (o que você deve gerar)
 Gere um documento Markdown completo com:
 
 ### A) Modelo de Domínio e Banco (Postgres)
@@ -238,7 +258,7 @@ Fase 2: cartão + payout + recarga + antifraude básico + auditoria admin
 Fase 3: disputas/chargeback + limites + reconciliação + relatórios
 Fase 4: escala (fila/eventos, particionamento, tracing)
 
-## 3) Restrições
+## 4) Restrições
 - Não copiar código.
 - Produzir pseudocódigo para endpoints críticos: accept ride, pix webhook confirm, settlement D+N, payout request, topup confirm.
 - Sempre indicar transações/locks e invariantes.
