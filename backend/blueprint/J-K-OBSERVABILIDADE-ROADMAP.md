@@ -421,7 +421,7 @@ groups:
 
 ---
 
-## 🔍 Tracing Distribuído (Opcional)
+## 🔍 Tracing Distribuído
 
 ### OpenTelemetry
 

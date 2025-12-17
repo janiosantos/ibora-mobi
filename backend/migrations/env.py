@@ -17,6 +17,7 @@ from app.modules.drivers.models.driver import Driver
 from app.modules.drivers.models.vehicle import Vehicle
 from app.modules.rides.models.ride import Ride
 from app.modules.finance.models.ledger import LedgerAccount, LedgerEntry
+from app.modules.incentives.models.campaign import Campaign, DriverMetric, DriverIncentive
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -28,7 +29,11 @@ if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
 # Overwrite sqlalchemy.url with the one from settings
-config.set_main_option("sqlalchemy.url", settings.SQLALCHEMY_DATABASE_URI)
+import os
+db_url = os.getenv("DATABASE_URL")
+if not db_url:
+    db_url = settings.SQLALCHEMY_DATABASE_URI
+config.set_main_option("sqlalchemy.url", db_url)
 
 # target_metadata is your Base.metadata
 target_metadata = Base.metadata

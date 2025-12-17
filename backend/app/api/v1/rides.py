@@ -15,6 +15,9 @@ from app.modules.auth.models.user import User
 from app.core.websocket import manager
 from app.core.rabbitmq import publish_message
 from app.services.payment_service import PaymentService
+from app.core.logging import get_logger
+
+logger = get_logger(__name__)
 
 router = APIRouter()
 
@@ -63,6 +66,16 @@ async def request_ride(
     db.add(ride)
     await db.commit()
     await db.refresh(ride)
+    
+    logger.info(
+        "ride_requested",
+        ride_id=str(ride.id),
+        passenger_id=str(passenger.id),
+        origin=ride.origin_address,
+        destination=ride.destination_address,
+        estimated_price=float(ride.estimated_price)
+    )
+
     # Notify nearby drivers via RabbitMQ
     await publish_message("new_rides_available", {
         "type": "NEW_RIDE",
@@ -97,6 +110,7 @@ async def accept_ride(
         select(Ride)
         .options(selectinload(Ride.passenger))
         .where(Ride.id == ride_id)
+        .with_for_update()
     )
     ride = result_ride.scalars().first()
     if not ride:
@@ -200,7 +214,19 @@ async def finish_ride(
             ride_id=ride.id,
             amount=ride.final_price,
             passenger_id=ride_p.passenger.user_id,
-            driver_user_id=current_user.id
+            driver_user_id=current_user.id,
+            driver_id=ride.driver_id
+        )
+
+        # Track Incentive Metrics (Async, but awaited for MVP simplicity. In prod, push to Queue)
+        # We need to import IncentiveService inside or top
+        from app.services.incentive_service import IncentiveService
+        incentive_service = IncentiveService(db)
+        await incentive_service.track_ride_event(
+            driver_id=ride.driver_id,
+            event_type="completed",
+            ride_value=ride.final_price,
+            ride_km=ride.distance_km or 0.0
         )
     
     await db.commit()

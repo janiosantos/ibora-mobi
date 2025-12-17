@@ -29,4 +29,6 @@ from app.core.websocket import manager
 
 @app.on_event("startup")
 async def startup_event():
+    from app.core.logging import configure_logging
+    configure_logging()
     await manager.startup()

@@ -18,8 +18,9 @@ ETAPA 0 — CONTEXTO E PREMISSAS (OBRIGATÓRIO)
 
 Contexto fixo:
 - Tipo de app: Mobilidade urbana (estilo Uber/99)
-- Backend: FastAPI + PostgreSQL + Redis
+- Backend: FastAPI + PostgreSQL + Redis + RabbitMQ
 - Tempo real: WebSocket
+- Workers Assíncronos: RabbitMQ + Celery + Redis + Redis Lock
 - Pagamentos:
   - Pix (Efí)
   - Cartão (provider plugável)
@@ -276,7 +277,6 @@ Entregáveis finais:
 RESTRIÇÕES GERAIS
 ====================================================================
 
-- Não copiar código de terceiros
 - Priorizar decisões explícitas
 - Sempre explicar o “por quê”
 - Sempre registrar trade-offs

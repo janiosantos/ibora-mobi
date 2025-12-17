@@ -2,7 +2,7 @@
 
 **Data:** 14/12/2024  
 **Versão:** 1.0  
-**Stack:** FastAPI + PostgreSQL + Redis + WebSocket
+**Stack:** FastAPI + PostgreSQL + Redis + WebSocket + Asyncio + RabbitMQ + Celery + Redis + Redis Lock
 
 ---
 

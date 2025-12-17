@@ -1,4 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
+from datetime import datetime
 from decimal import Decimal
 from uuid import UUID
 import uuid
@@ -6,6 +8,10 @@ import uuid
 from app.services.ledger_service import LedgerService
 # from app.core.config import settings
 # import httpx (For real integration)
+from app.core.logging import get_logger
+from app.modules.incentives.models.campaign import Campaign, DriverIncentive, CampaignType
+
+logger = get_logger(__name__)
 
 class PaymentService:
     def __init__(self, db: AsyncSession):
@@ -26,90 +32,187 @@ class PaymentService:
             "status": "PENDING"
         }
 
-    async def distribute_ride_payment(self, ride_id: UUID, amount: Decimal, passenger_id: UUID, driver_user_id: UUID):
+    async def distribute_ride_payment(self, ride_id: UUID, amount: Decimal, passenger_id: UUID, driver_user_id: UUID, driver_id: UUID):
         """
-        Distributes the ride payment:
-        1. Debit Passenger Wallet (Liability Decrease)
-        2. Credit Driver Wallet (Liability Increase) - 80%
-        3. Credit Platform Revenue (Revenue Increase) - 20%
+        Distributes the ride payment following Blueprint Item F - Step 3.
+        Entries:
+        - Debit 4100 RECEITA_CORRIDAS (Full Amount) - clearing the temporary revenue booking
+        - Credit 4200 COMISSAO_PLATAFORMA (20%)
+        - Credit 2100 MOTORISTAS_A_PAGAR (80%)
+        
+        Prerequisite: The ride revenue should have been booked to 4100 already (e.g. at payment confirmation).
+        If not, we verify the flow. 
+        Blueprint Step 2 (Webhook) -> Credits 4100.
+        Blueprint Step 3 (Distribution) -> Debits 4100, Credits Splits.
         """
+        
         
         # Calculate shares
         platform_fee_percentage = Decimal("0.20")
+        
+        # Check for active commission discount
+        # Join DriverIncentive and Campaign to filter by Campaign type and date
+        stmt = (
+            select(DriverIncentive)
+            .join(Campaign)
+            .where(
+                DriverIncentive.driver_id == driver_id,
+                Campaign.type == CampaignType.COMMISSION_DISCOUNT,
+                Campaign.enabled == True,
+                Campaign.start_date <= datetime.utcnow(),
+                Campaign.end_date >= datetime.utcnow()
+            )
+        )
+        result = await self.db.execute(stmt)
+        incentive = result.scalars().first()
+
+        if incentive:
+            # Assuming reward_amount represents the discount (e.g. 0.05 for 5%)
+            discount = incentive.reward_amount
+            platform_fee_percentage -= discount
+            if platform_fee_percentage < 0:
+                platform_fee_percentage = Decimal("0.00")
+            
+            logger.info(
+                "commission_discount_applied", 
+                driver_id=str(driver_id), 
+                discount=float(discount), 
+                new_rate=float(platform_fee_percentage)
+            )
+
         platform_fee = amount * platform_fee_percentage
         driver_amount = amount - platform_fee
         
-        # 1. Accounts
-        passenger_wallet = await self.ledger_service.get_or_create_account(f"User Wallet - {passenger_id}", "LIABILITY", passenger_id)
-        driver_wallet = await self.ledger_service.get_or_create_account(f"User Wallet - {driver_user_id}", "LIABILITY", driver_user_id)
-        platform_revenue = await self.ledger_service.get_or_create_account("Platform Revenue Account", "REVENUE")
-        
-        # 2. Transaction 1: Transfer from Passenger to Driver & Platform
-        # Since our ledger supports 1 debit / 1 credit per atomic call, we split into TWO transactions or ONE complex if supported.
-        # Current implementation supports 1 debit / 1 credit.
-        # We can implement a multi-entry transaction in LedgerService or just do 2 calls.
-        # Better approach for double-entry:
-        # T1: Debit Passenger Wallet (Full Amount), Credit Intermediate/Settlement Account (or Driver directly then pay fee?)
-        # Let's do:
-        # T1: Debit Passenger, Credit Driver (Full Amount)
-        # T2: Debit Driver, Credit Platform (Fee) -> This mimics "commission" being taken out.
-        # OR
-        # T1: Debit Passenger, Credit Platform Clearing (Asset/Liability)
-        # T2: Debit Platform Clearing, Credit Driver
-        # T3: Debit Platform Clearing, Credit Revenue
-        
-        # Simpler for this MVP:
-        # T1: Debit Passenger, Credit Driver (Driver Amount)
-        # T2: Debit Passenger, Credit Revenue (Fee Amount)
-        
-        # Transaction 1: Pay Driver Name
-        await self.ledger_service.record_transaction(
-            debit_account_id=passenger_wallet.id,
-            credit_account_id=driver_wallet.id,
-            amount=driver_amount,
-            description=f"Ride {ride_id} Payment (Driver Share)",
-            reference_type="RIDE_PAYMENT",
-            reference_id=ride_id
+        logger.info(
+            "distributing_payment",
+            ride_id=str(ride_id),
+            total_amount=float(amount),
+            driver_amount=float(driver_amount),
+            platform_fee=float(platform_fee),
+            driver_id=str(driver_id),
+            rate=float(platform_fee_percentage)
         )
         
-        # Transaction 2: Pay Platform Fee
-        await self.ledger_service.record_transaction(
-            debit_account_id=passenger_wallet.id,
-            credit_account_id=platform_revenue.id,
-            amount=platform_fee,
-            description=f"Ride {ride_id} Platform Fee",
-            reference_type="RIDE_FEE",
-            reference_id=ride_id
+        # 1. Ensure Accounts Exist with correct Blueprint Codes
+        # 4100 - RECEITA_CORRIDAS (Income)
+        revenue_account = await self.ledger_service.get_or_create_account(
+            name="Receita de Corridas",
+            type="REVENUE",
+            code="4100",
+            classification="DETAIL",
+            description="Receita bruta de corridas"
         )
+        
+        # 4200 - COMISSAO_PLATAFORMA (Income)
+        commission_account = await self.ledger_service.get_or_create_account(
+            name="Comissão Plataforma",
+            type="REVENUE",
+            code="4200",
+            classification="DETAIL",
+            description="Comissão da plataforma (20%)"
+        )
+        
+        # 2100 - MOTORISTAS_A_PAGAR (Liability)
+        # Note: This is a SUMMARY account or specific driver account? 
+        # Blueprint implies a general account 2100 but breakdown by driver_id.
+        # Our Ledger implementation supports specific accounts or usage of `entity_id`.
+        # Ideally: One Account 2100, but broken down by Analysis (which we don't strictly have).
+        # OR: Separate accounts "Motorista a Pagar - {DriverID}" mapped to parent 2100.
+        # Given MVP, let's create a specific account for the driver but maybe use a suffix or just use the generic one + entity_id (if added support).
+        # Current LedgerService support `get_or_create_account` by name/code. 
+        # Let's use specific account per driver for easy balance check, but code needs to be unique.
+        # So Driver Account Code = "2100-{driver_id_short}"
+        
+        driver_code = f"2100-{str(driver_id)[:8]}"
+        driver_payable = await self.ledger_service.get_or_create_account(
+            name=f"Motorista a Pagar - {driver_id}",
+            type="LIABILITY",
+            code=driver_code,
+            user_id=driver_user_id,
+            classification="DETAIL",
+            description="Saldo a pagar ao motorista"
+        )
+        
+        # Transaction ID
+        tx_id = f"dist_{ride_id}"
+        
+        # Prepare Entries
+        entries = [
+            {
+                "account_id": revenue_account.id,
+                "entry_type": "DEBIT",
+                "amount": amount,
+                "description": f"Distribuição receita corrida {ride_id}",
+                "reference_type": "RIDE_DISTRIBUTION",
+                "reference_id": ride_id
+            },
+            {
+                "account_id": commission_account.id,
+                "entry_type": "CREDIT",
+                "amount": platform_fee,
+                "description": "Comissão plataforma 20%",
+                "reference_type": "RIDE_DISTRIBUTION",
+                "reference_id": ride_id
+            },
+            {
+                "account_id": driver_payable.id,
+                "entry_type": "CREDIT",
+                "amount": driver_amount,
+                "description": f"Saldo motorista corrida {ride_id}",
+                "reference_type": "RIDE_DISTRIBUTION",
+                "reference_id": ride_id
+            }
+        ]
+        
+        await self.ledger_service.create_journal_entry(tx_id, entries)
         
         return {"status": "distributed", "driver_amount": driver_amount, "platform_fee": platform_fee}
 
-    async def process_payment_webhook(self, txid: str, amount: Decimal, user_id: UUID):
+
+    async def process_payment_webhook(self, txid: str, amount: Decimal, user_id: UUID, ride_id: UUID = None):
         """
-        Callback when payment is confirmed.
-        Records entry in Ledger.
+        Callback when payment is confirmed (Blueprint Step 2).
+        Debits 1300 PIX_A_RECEBER (Asset)
+        Credits 4100 RECEITA_CORRIDAS (Income)
         """
-        # 1. Find or Create User Wallet Account (Liability for Platform)
-        # 2. Find or Create Bank Account (Asset for Platform)
         
-        # Assumption: System accounts created on startup or on demand
-        wallet_name = f"User Wallet - {user_id}"
-        bank_name = "Platform Main Bank Account"
-        
-        wallet = await self.ledger_service.get_or_create_account(wallet_name, "LIABILITY", user_id) 
-        bank = await self.ledger_service.get_or_create_account(bank_name, "ASSET")
-        
-        # Transaction: 
-        # Debit Bank (Increase Asset)
-        # Credit User Wallet (Increase Liability - Platform owes user service/money)
-        
-        await self.ledger_service.record_transaction(
-            debit_account_id=bank.id,
-            credit_account_id=wallet.id,
-            amount=amount,
-            description=f"Topup via PIX txid {txid}",
-            reference_type="TOPUP",
-            reference_id=None # Could be payment record ID
+        # 1300 - PIX_A_RECEBER
+        pix_asset = await self.ledger_service.get_or_create_account(
+            name="Pix a Receber",
+            type="ASSET",
+            code="1300",
+            classification="DETAIL",
+            description="Valores a receber via Pix"
         )
+        
+        # 4100 - RECEITA_CORRIDAS
+        revenue_account = await self.ledger_service.get_or_create_account(
+            name="Receita de Corridas",
+            type="REVENUE",
+            code="4100",
+            classification="DETAIL",
+            description="Receita bruta de corridas"
+        )
+
+        entries = [
+            {
+                "account_id": pix_asset.id,
+                "entry_type": "DEBIT",
+                "amount": amount,
+                "description": f"Pagamento Pix txid {txid}",
+                "reference_type": "PAYMENT",
+                # "reference_id": ride_id # If we have it
+            },
+            {
+                "account_id": revenue_account.id,
+                "entry_type": "CREDIT",
+                "amount": amount,
+                "description": f"Receita corrida (Pre-booking)",
+                "reference_type": "PAYMENT",
+                # "reference_id": ride_id
+            }
+        ]
+        
+        await self.ledger_service.create_journal_entry(f"pay_{txid}", entries)
         
         return {"status": "processed"}
