@@ -50,12 +50,15 @@ class Settings(BaseSettings):
     # RabbitMQ
     RABBITMQ_URL: str = "amqp://guest:guest@localhost/"
 
-    # Efi (Pix)
-    EFI_ENV: Optional[str] = None
-    EFI_CLIENT_ID: Optional[str] = None
-    EFI_CLIENT_SECRET: Optional[str] = None
-    EFI_CERT_PATH: Optional[str] = None
+    # Efí Bank (Pix)
+    EFI_CLIENT_ID: Optional[str] = "Client_Id_d45febcef25500d2ff3b56fbf32b9a61b30dea2a"
+    EFI_CLIENT_SECRET: Optional[str] = "Client_Secret_09c6be42a50a96c9a38c0074e0ba7a104c63a7a9"
+    EFI_CERTIFICATE_PATH: Optional[str] = "/home/jpsantos/Projetos-dev/ibora-mobi/efi-ibora-mobi-test.p12"
+    EFI_SANDBOX: bool = True
     EFI_PIX_KEY: Optional[str] = None
+
+    # Google Maps
+    GOOGLE_MAPS_API_KEY: Optional[str] = None
 
     model_config = SettingsConfigDict(
         env_file=".env",

@@ -17,3 +17,9 @@
 
 # IDE
 # **/.vscode/
+
+#CERTIFICADOS
+**/.p12
+**/.crt
+.crt
+.p12

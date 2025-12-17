@@ -32,3 +32,11 @@ INFO:__main__:Worker received new ride: {'type': 'NEW_RIDE', 'ride_id': 'ca35326
 INFO:__main__:Published notification to Redis for ride ca35326c-35b9-4956-9b08-a1363fc6052d
 INFO:__main__:Worker received new ride: {'type': 'NEW_RIDE', 'ride_id': '8918ef76-8263-4295-bf85-cb66eae97ec5', 'origin': 'Praça da Sé, SP', 'destination': 'Av. Paulista, SP', 'price': 22.5, 'distance': 5.0, 'timestamp': '2025-12-17T06:16:26.510934'}
 INFO:__main__:Published notification to Redis for ride 8918ef76-8263-4295-bf85-cb66eae97ec5
+INFO:__main__:Worker received new ride: {'type': 'NEW_RIDE', 'ride_id': '5cd7c053-edd6-4edc-8908-b74e3a5a511d', 'origin': 'Praça da Sé, SP', 'destination': 'Av. Paulista, SP', 'price': 22.5, 'distance': 5.0, 'timestamp': '2025-12-17T06:30:05.502227'}
+INFO:__main__:Published notification to Redis for ride 5cd7c053-edd6-4edc-8908-b74e3a5a511d
+INFO:__main__:Worker received new ride: {'type': 'NEW_RIDE', 'ride_id': 'd50fdae7-db99-43a8-8967-96505b869721', 'origin': 'Praça da Sé, SP', 'destination': 'Av. Paulista, SP', 'price': 20.0, 'distance': 5.0, 'timestamp': '2025-12-17T15:19:35.950445'}
+INFO:__main__:Published notification to Redis for ride d50fdae7-db99-43a8-8967-96505b869721
+INFO:__main__:Worker received new ride: {'type': 'NEW_RIDE', 'ride_id': '15eda087-19df-4bad-bef0-142196bc8ff9', 'origin': 'Praça da Sé, SP', 'destination': 'Av. Paulista, SP', 'price': 20.0, 'distance': 5.0, 'timestamp': '2025-12-17T15:20:55.012486'}
+INFO:__main__:Published notification to Redis for ride 15eda087-19df-4bad-bef0-142196bc8ff9
+INFO:__main__:Worker received new ride: {'type': 'NEW_RIDE', 'ride_id': 'd4c8fe3a-6035-4008-9a7b-0ce98670961e', 'origin': 'Praça da Sé, SP', 'destination': 'Av. Paulista, SP', 'price': 20.0, 'distance': 5.0, 'timestamp': '2025-12-17T15:21:42.102037'}
+INFO:__main__:Published notification to Redis for ride d4c8fe3a-6035-4008-9a7b-0ce98670961e

@@ -1,15 +1,12 @@
-from typing import List, Dict
-from fastapi import WebSocket
-
 import json
 import asyncio
-import logging
 from typing import List, Dict, Optional
 from fastapi import WebSocket, WebSocketDisconnect
 from redis import asyncio as aioredis
 from app.core.config import settings
+from app.core.logging import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 class ConnectionManager:
     def __init__(self):
@@ -28,7 +25,7 @@ class ConnectionManager:
             self.active_connections[user_id] = []
         self.active_connections[user_id].append(websocket)
         self.user_roles[user_id] = role
-        logger.info(f"User {user_id} ({role}) connected.")
+        logger.info("User connected", user_id=user_id, role=role)
 
     def disconnect(self, websocket: WebSocket, user_id: str):
         if user_id in self.active_connections:
@@ -38,7 +35,7 @@ class ConnectionManager:
                 del self.active_connections[user_id]
                 if user_id in self.user_roles:
                     del self.user_roles[user_id]
-        logger.info(f"User {user_id} disconnected.")
+        logger.info("User disconnected", user_id=user_id)
 
     async def send_personal_message(self, message: dict, user_id: str):
         if user_id in self.active_connections:
@@ -46,7 +43,7 @@ class ConnectionManager:
                 try:
                     await connection.send_json(message)
                 except Exception as e:
-                    logger.error(f"Error sending personal message to {user_id}: {e}")
+                    logger.error("Error sending personal message", user_id=user_id, error=str(e))
 
     async def broadcast_to_drivers(self, message: dict):
         """
@@ -66,7 +63,7 @@ class ConnectionManager:
                     try:
                         await ws.send_json(message)
                     except Exception as e:
-                        logger.error(f"Error broadcasting to driver {user_id}: {e}")
+                        logger.error("Error broadcasting to driver", user_id=user_id, error=str(e))
 
     # --- Redis Integration ---
     async def startup(self):
@@ -75,7 +72,7 @@ class ConnectionManager:
         self.pubsub = self.redis.pubsub()
         await self.pubsub.subscribe("ride_notifications")
         asyncio.create_task(self._redis_listener())
-        logger.info("Redis Pub/Sub listener started.")
+        logger.info("Redis Pub/Sub listener started")
 
     async def _redis_listener(self):
         """Listens for messages from Redis and broadcasts them locally."""
@@ -96,6 +93,6 @@ class ConnectionManager:
                             await self.send_personal_message(data, target_user_id)
 
         except Exception as e:
-            logger.error(f"Redis listener error: {e}")
+            logger.error("Redis listener error", error=str(e))
 
 manager = ConnectionManager()

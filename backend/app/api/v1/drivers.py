@@ -91,3 +91,73 @@ async def read_driver_me(
     if not driver:
         raise HTTPException(status_code=404, detail="Driver profile not found")
     return driver
+
+@router.post("/me/status", response_model=driver_schema.Driver)
+async def update_driver_status(
+    status_in: driver_schema.DriverStatusUpdate,
+    db: AsyncSession = Depends(database.get_db),
+    current_user: User = Depends(deps.get_current_user),
+) -> Any:
+    """
+    Update driver online status (online/offline).
+    """
+    result = await db.execute(select(Driver).where(Driver.user_id == current_user.id))
+    driver = result.scalars().first()
+    if not driver:
+        raise HTTPException(status_code=404, detail="Driver profile not found")
+    
+    # Update status logic
+    from app.modules.drivers.models.driver import DriverOnlineStatus
+    from app.services.matching import MatchingService
+    
+    # Convert string to Enum or validate
+    try:
+        new_status = DriverOnlineStatus(status_in.status)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid status")
+        
+    driver.online_status = new_status
+    
+    # If going offline, remove from Redis
+    if new_status == DriverOnlineStatus.OFFLINE:
+        MatchingService.remove_driver_from_redis(str(driver.id))
+        
+    await db.commit()
+    await db.refresh(driver)
+    return driver
+
+@router.post("/me/location", response_model=driver_schema.Driver)
+async def update_driver_location(
+    location_in: driver_schema.DriverLocationUpdate,
+    db: AsyncSession = Depends(database.get_db),
+    current_user: User = Depends(deps.get_current_user),
+) -> Any:
+    """
+    Update driver location.
+    """
+    result = await db.execute(select(Driver).where(Driver.user_id == current_user.id))
+    driver = result.scalars().first()
+    if not driver:
+        raise HTTPException(status_code=404, detail="Driver profile not found")
+        
+    if driver.online_status != "online" and driver.online_status != "in_ride":
+         # Maybe allow updates even if offline, but typically only tracking when online
+         # For now, just allow updates.
+         pass
+
+    from app.services.matching import MatchingService
+    
+    # Update location
+    await MatchingService.update_driver_location(
+        driver_id=str(driver.id), # Redis needs string
+        latitude=location_in.latitude,
+        longitude=location_in.longitude,
+        db=db
+    )
+    
+    # Refresh to get updated object (location might not refetch automatically from db update call in service if not in same session transaction context properly managed, 
+    # but here we pass db session so it should be fine if we commit in service. 
+    # Actually service does commit. So we just refresh.)
+    await db.refresh(driver)
+    
+    return driver

@@ -1,12 +1,12 @@
 from aiormq import connect
 import json
-import logging
 from typing import Any
 from app.core.config import settings
 import aiormq
 from aiormq import spec
+from app.core.logging import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 class RabbitMQProducer:
     def __init__(self, rabbitmq_url: str):
@@ -32,9 +32,9 @@ class RabbitMQProducer:
                 routing_key=queue_name,
                 properties=spec.Basic.Properties(delivery_mode=2)
             )
-            logger.info(f"Message published to {queue_name}")
+            logger.info("Message published", queue_name=queue_name)
         except Exception as e:
-            logger.error(f"Failed to publish message: {e}")
+            logger.error("Failed to publish message", error=str(e))
             raise e
 
     async def close(self):

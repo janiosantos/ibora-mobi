@@ -16,8 +16,13 @@ from app.modules.passengers.models.passenger import Passenger
 from app.modules.drivers.models.driver import Driver
 from app.modules.drivers.models.vehicle import Vehicle
 from app.modules.rides.models.ride import Ride
+from app.modules.rides.models.ride import Ride
 from app.modules.finance.models.ledger import LedgerAccount, LedgerEntry
+from app.modules.finance.models.financial_event import FinancialEvent
+from app.modules.finance.models.payment import Payment
 from app.modules.incentives.models.campaign import Campaign, DriverMetric, DriverIncentive
+from app.modules.finance.models.wallet import DriverWallet
+from app.modules.finance.models.settlement import Settlement
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

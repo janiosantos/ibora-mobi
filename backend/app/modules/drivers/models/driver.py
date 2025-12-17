@@ -1,9 +1,16 @@
-from sqlalchemy import Column, String, Integer, Numeric, Date, Boolean, DateTime, ForeignKey, CheckConstraint
+from sqlalchemy import Column, String, Integer, Numeric, Date, Boolean, DateTime, ForeignKey, CheckConstraint, Enum as SQLEnum
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
+from geoalchemy2 import Geography
 from app.core.base import Base
 import uuid
+import enum
+
+class DriverOnlineStatus(str, enum.Enum):
+    ONLINE = "online"
+    OFFLINE = "offline"
+    IN_RIDE = "in_ride"
 
 class Driver(Base):
     __tablename__ = "drivers"
@@ -12,7 +19,7 @@ class Driver(Base):
     
     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), unique=True, nullable=False)
     full_name = Column(String(255), nullable=False)
-    cpf = Column(String(11), unique=True, nullable=False)
+    cpf = Column(String(20), unique=True, nullable=False)
     phone = Column(String(20), nullable=False)
     email = Column(String(255), nullable=False)
     
@@ -35,10 +42,8 @@ class Driver(Base):
     approved_at = Column(DateTime(timezone=True))
     approved_by = Column(UUID(as_uuid=True), ForeignKey("users.id"))
     
-    # Localização
-    current_lat = Column(Numeric(10, 8))
-    current_lon = Column(Numeric(11, 8))
-    current_heading = Column(Numeric(5, 2))
+    # Localização (PostGIS)
+    location = Column(Geography(geometry_type='POINT', srid=4326), nullable=True)
     last_location_update = Column(DateTime(timezone=True))
     
     # Avaliação e Stats
@@ -49,7 +54,12 @@ class Driver(Base):
     total_earnings = Column(Numeric(10, 2), default=0.00)
     
     # Disponibilidade
-    online = Column(Boolean, default=False)
+    online_status = Column(
+        SQLEnum(DriverOnlineStatus, values_callable=lambda obj: [e.value for e in obj]),
+        default=DriverOnlineStatus.OFFLINE,
+        nullable=False,
+        index=True
+    )
     accepting_rides = Column(Boolean, default=True)
     
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
@@ -59,10 +69,10 @@ class Driver(Base):
     # Relationships
     user = relationship("User", foreign_keys=[user_id], backref="driver_profile")
     vehicles = relationship("Vehicle", back_populates="driver", cascade="all, delete-orphan")
+    wallet = relationship("DriverWallet", uselist=False, back_populates="driver", cascade="all, delete-orphan")
 
     __table_args__ = (
         CheckConstraint("status IN ('pending_approval', 'active', 'available', 'on_trip', 'offline', 'suspended', 'banned')", name='valid_driver_status'),
         CheckConstraint("approval_status IN ('pending', 'approved', 'rejected')", name='valid_driver_approval_status'),
         CheckConstraint("average_rating >= 1.00 AND average_rating <= 5.00", name='valid_driver_rating'),
-        # cnh_not_expired check is hard in SQL creation usually left for triggers or app validation logic, omitting for simplicity in model definition but keeping in mind.
     )

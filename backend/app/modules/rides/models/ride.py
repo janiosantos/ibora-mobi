@@ -23,6 +23,9 @@ class Ride(Base):
     destination_lon = Column(Numeric(11, 8), nullable=False)
     destination_address = Column(String(255), nullable=False)
     
+    # Route Geometry
+    route_polyline = Column(String, nullable=True) # Encoded polyline from Google Maps
+    
     # Estatísticas/Estimativas
     distance_km = Column(Numeric(10, 2))
     duration_min = Column(Integer)
@@ -48,5 +51,5 @@ class Ride(Base):
     driver = relationship("Driver", backref="rides")
     
     __table_args__ = (
-        CheckConstraint("status IN ('REQUESTED', 'SEARCHING', 'OFFERED', 'ACCEPTED', 'ARRIVED', 'STARTED', 'COMPLETED', 'CANCELLED')", name='valid_ride_status'),
+        CheckConstraint("status IN ('REQUESTED', 'SEARCHING', 'OFFERED', 'ACCEPTED', 'DRIVER_ARRIVING', 'ARRIVED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED')", name='valid_ride_status'),
     )

@@ -39,3 +39,11 @@ class DriverInDBBase(DriverBase):
 
 class Driver(DriverInDBBase):
     pass
+
+class DriverLocationUpdate(BaseModel):
+    latitude: float
+    longitude: float
+
+class DriverStatusUpdate(BaseModel):
+    status: str # online, offline 
+    # Or strict Enum matching DriverOnlineStatus if possible, but str is flexible for input

@@ -1,5 +1,4 @@
 import asyncio
-import logging
 from typing import List
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, update
@@ -10,10 +9,9 @@ from app.core.database import AsyncSessionLocal as async_session_factory
 from app.services.payout_service import PayoutService
 from app.modules.finance.models.payout import Payout
 from app.modules.finance.models.ledger import LedgerAccount, LedgerRunningBalance, LedgerEntry
+from app.core.logging import get_logger, configure_logging
 
-# Setup logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 async def process_pending_payouts():
     """
@@ -27,14 +25,14 @@ async def process_pending_payouts():
         payout_ids = result.scalars().all()
         
         if payout_ids:
-            logger.info(f"Found {len(payout_ids)} pending payouts. Processing...")
+            logger.info("Found pending payouts", count=len(payout_ids))
             
         for payout_id in payout_ids:
             try:
                 await payout_service.process_payout(payout_id)
-                logger.info(f"Processed payout {payout_id}")
+                logger.info("Processed payout", payout_id=str(payout_id))
             except Exception as e:
-                logger.error(f"Error processing payout {payout_id}: {e}")
+                logger.error("Error processing payout", payout_id=str(payout_id), error=str(e))
                 # traceback.print_exc()
 
 async def update_running_balances():
@@ -60,13 +58,14 @@ async def update_running_balances():
             pass
 
 async def main():
+    configure_logging()
     logger.info("Starting Financial Worker...")
     while True:
         try:
             await process_pending_payouts()
             # await update_running_balances()
         except Exception as e:
-            logger.error(f"Worker Error: {e}")
+            logger.error("Worker Error", error=str(e))
             traceback.print_exc()
             
         await asyncio.sleep(10) # Poll every 10s

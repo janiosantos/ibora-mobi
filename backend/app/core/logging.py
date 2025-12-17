@@ -2,22 +2,19 @@ import sys
 import structlog
 import logging
 from typing import Any, Dict
+from app.core.config import settings
 
-def configure_logging(log_level: str = "INFO", json_logs: bool = True) -> None:
+def configure_logging() -> None:
     """
     Configures structlog and standard logging.
     """
     
-    # Standard Logging Configuration
-    logging.basicConfig(
-        format="%(message)s",
-        stream=sys.stdout,
-        level=getattr(logging, log_level.upper()),
-    )
+    # Determine if we should output JSON
+    json_logs = settings.APP_ENV in ["production", "staging"]
+    log_level = "INFO" # Could also come from settings
 
-    processors = [
+    shared_processors = [
         structlog.contextvars.merge_contextvars,
-        structlog.stdlib.filter_by_level,
         structlog.stdlib.add_logger_name,
         structlog.stdlib.add_log_level,
         structlog.stdlib.PositionalArgumentsFormatter(),
@@ -27,19 +24,39 @@ def configure_logging(log_level: str = "INFO", json_logs: bool = True) -> None:
         structlog.processors.UnicodeDecoder(),
     ]
 
-    if json_logs:
-        # JSON Renderer for Production/Staging
-        processors.append(structlog.processors.JSONRenderer())
-    else:
-        # Console Renderer for Local Dev (Human Readable)
-        processors.append(structlog.dev.ConsoleRenderer())
-
+    # Structlog Configuration
     structlog.configure(
-        processors=processors,
+        processors=shared_processors + [
+            # Prepare event dict for `ProcessorFormatter`
+            structlog.stdlib.ProcessorFormatter.wrap_for_formatter,
+        ],
         logger_factory=structlog.stdlib.LoggerFactory(),
         wrapper_class=structlog.stdlib.BoundLogger,
         cache_logger_on_first_use=True,
     )
+
+    # Standard Library Logging Configuration
+    processor_formatter = structlog.stdlib.ProcessorFormatter(
+        # These run ONLY on `logging` entries that didn't come from structlog
+        foreign_pre_chain=shared_processors,
+        
+        # These run on EVERYTHING (structlog + standard logging)
+        processors=[
+            structlog.stdlib.ProcessorFormatter.remove_processors_meta,
+            structlog.processors.JSONRenderer() if json_logs else structlog.dev.ConsoleRenderer(),
+        ],
+    )
+
+    handler = logging.StreamHandler(sys.stdout)
+    handler.setFormatter(processor_formatter)
+    
+    root_logger = logging.getLogger()
+    root_logger.handlers = [handler]
+    root_logger.setLevel(getattr(logging, log_level.upper()))
+    
+    # Silence overly verbose loggers if needed
+    logging.getLogger("uvicorn.access").handlers = [handler]
+    logging.getLogger("uvicorn.access").propagate = False
 
 def get_logger(name: str):
     return structlog.get_logger(name)

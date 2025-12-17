@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 # Add backend directory to sys.path
 sys.path.append(os.getcwd())
 
-from app.core.database import SessionLocal as async_session_factory
+from app.core.database import AsyncSessionLocal as async_session_factory
 from app.services.payment_service import PaymentService
 from app.modules.auth.models.user import User
 from app.modules.drivers.models.driver import Driver
@@ -20,20 +20,32 @@ async def test_discount():
 
         # 1. Create Driver User
         driver_email = f"driver_disc_{uuid.uuid4().hex[:6]}@example.com"
+        # Generate random unique phone
+        driver_phone = f"+55119{uuid.uuid4().int % 100000000:08d}"
+
         driver_user = User(
             email=driver_email,
-            hashed_password="hashed_secret",
-            full_name="Discount Driver",
-            phone_number="+5511999999999",
+            password_hash="hashed_secret",
+            phone=driver_phone,
             user_type="driver"
         )
         db.add(driver_user)
         await db.flush() # flush to get ID
 
         # 2. Create Driver Profile
+        # Generate random CPF/CNH to satisfy unique constraints
+        random_cpf = f"{uuid.uuid4().int % 100000000000:011d}"
+        random_cnh = f"{uuid.uuid4().int % 10000000000:010d}"
+
         driver_profile = Driver(
             user_id=driver_user.id,
-            license_number="1234567890",
+            full_name="Discount Driver",
+            email=driver_email,
+            phone=driver_phone,
+            cpf=random_cpf,
+            cnh_number=random_cnh,
+            cnh_category="B",
+            cnh_expiry_date=datetime.now().date() + timedelta(days=365),
             status="active"
         )
         db.add(driver_profile)
@@ -65,7 +77,7 @@ async def test_discount():
         db.add(incentive)
         await db.commit() # Commit all
 
-        print(f"✅ Setup Complete. Driver: {driver_profile.id}, Incentive: 5%")
+        print(f"✅ Setup Complete. DriverID: {driver_profile.id}, Incentive: 5%")
 
         # 5. Distribute Payment
         payment_service = PaymentService(db)

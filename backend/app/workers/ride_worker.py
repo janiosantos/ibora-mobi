@@ -1,13 +1,11 @@
 import asyncio
 import json
-import logging
 from aiormq import connect
 from redis import asyncio as aioredis
 from app.core.config import settings
+from app.core.logging import get_logger, configure_logging
 
-# Configure basic logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 RABBITMQ_URL = getattr(settings, "RABBITMQ_URL", "amqp://guest:guest@localhost/")
 QUEUE_NAME = "new_rides_available"
@@ -17,7 +15,7 @@ async def on_new_ride_message(message):
     """Callback triggered when a new ride message is received."""
     try:
         data = json.loads(message.body.decode())
-        logger.info(f"Worker received new ride: {data}")
+        logger.info("Worker received new ride", ride_id=data.get("ride_id"))
 
         # --- Business Logic / Processing ---
         # Here you could calculate additional ETAs, filter drivers, etc.
@@ -36,13 +34,13 @@ async def on_new_ride_message(message):
         await redis.publish("ride_notifications", json.dumps(notification))
         await redis.close()
         
-        logger.info(f"Published notification to Redis for ride {data.get('ride_id')}")
+        logger.info("Published notification to Redis", ride_id=data.get("ride_id"))
 
         # Acknowledge message
         await message.channel.basic_ack(message.delivery.delivery_tag)
         
     except Exception as e:
-        logger.error(f"Error processing message: {e}")
+        logger.error("Error processing message", error=str(e))
         # Optionally reject or nack
         # await message.channel.basic_nack(message.delivery.delivery_tag)
 
@@ -63,7 +61,8 @@ async def consume_rides_queue():
     await asyncio.Future()
 
 if __name__ == "__main__":
+    configure_logging()
     try:
         asyncio.run(consume_rides_queue())
     except KeyboardInterrupt:
-        logger.info("Worker stopped.")
+        logger.info("Worker stopped")

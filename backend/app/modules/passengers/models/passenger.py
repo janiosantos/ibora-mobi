@@ -12,7 +12,7 @@ class Passenger(Base):
     
     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), unique=True, nullable=False)
     full_name = Column(String(255), nullable=False)
-    cpf = Column(String(11), unique=True)
+    cpf = Column(String(20), unique=True)
     phone = Column(String(20), nullable=False)
     email = Column(String(255), nullable=False)
     
