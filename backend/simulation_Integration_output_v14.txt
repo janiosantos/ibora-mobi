@@ -1,0 +1,18 @@
+🚀 Starting Ibora Mobi Ride Simulation...
+
+[1] Creating Passenger...
+    Passenger User Created: user_65c63af7@example.com
+    Passenger Profile Created: 2563ad7c-769b-4cde-b1d4-ff4a18013787
+
+[2] Creating Driver...
+    Driver User Created: user_a6158eed@example.com
+    Driver Profile Created: 80c46e2e-adbe-4835-93f1-6b9942dc5cee
+    Vehicle: Corolla (LKZ0411)
+
+[3] Requesting Ride...
+    Ride Requested: 9fdd403e-05e7-476a-8d85-f5569505c715
+    Status: REQUESTED
+    Estimated Price: R$ 22.50
+
+[4] Accepting Ride (Driver)...
+Failed to accept ride: Internal Server Error

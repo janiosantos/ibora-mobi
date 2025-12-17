@@ -1,31 +1,19 @@
-SHELL := /bin/bash
+.PHONY: up down logs shell install run
 
-VENV := .venv
-PY := $(VENV)/bin/python
-PIP := $(VENV)/bin/pip
+up:
+	docker-compose up -d
 
-APP_MODULE := app.main:app
-HOST := 0.0.0.0
-PORT := 8000
+down:
+	docker-compose down
 
-.PHONY: venv install run run-local test lint
+logs:
+	docker-compose logs -f
 
-venv:
-	python3 -m venv $(VENV)
-	$(PIP) install -U pip
+db-shell:
+	docker-compose exec db psql -U postgres -d ibora_mobi
 
-install: venv
-	$(PIP) install -r requirements.txt
+install:
+	poetry install
 
-# roda SEM depender do PYTHONPATH (usa "python -m uvicorn")
 run:
-	cd $(CURDIR) && \
-	$(VENV)/bin/python -m uvicorn $(APP_MODULE) --host $(HOST) --port $(PORT) --reload
-
-# Se você rodar fora do backend por engano, use isso:
-run-local:
-	cd $(CURDIR) && \
-	PYTHONPATH="$(CURDIR)" $(VENV)/bin/python -m uvicorn $(APP_MODULE) --host $(HOST) --port $(PORT) --reload
-
-test:
-	cd $(CURDIR) && $(VENV)/bin/python -m pytest -q
+	poetry run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000

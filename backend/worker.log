@@ -1,0 +1,10 @@
+INFO:__main__:Connecting to RabbitMQ...
+INFO:__main__:Worker started consuming...
+INFO:__main__:Worker received new ride: {'type': 'NEW_RIDE', 'ride_id': '9fdd403e-05e7-476a-8d85-f5569505c715', 'origin': 'Praça da Sé, SP', 'destination': 'Av. Paulista, SP', 'price': 22.5, 'distance': 5.0, 'timestamp': '2025-12-17T04:14:06.857420'}
+/home/jpsantos/Projetos-dev/ibora-mobi/backend/app/workers/ride_worker.py:37: DeprecationWarning: Call to deprecated close. (Use aclose() instead) -- Deprecated since version 5.0.1.
+  await redis.close()
+INFO:__main__:Published notification to Redis for ride 9fdd403e-05e7-476a-8d85-f5569505c715
+INFO:__main__:Worker received new ride: {'type': 'NEW_RIDE', 'ride_id': 'c24cbe27-7cfe-4c91-9e6a-f34bf6e3f4b5', 'origin': 'Praça da Sé, SP', 'destination': 'Av. Paulista, SP', 'price': 22.5, 'distance': 5.0, 'timestamp': '2025-12-17T04:17:05.554993'}
+INFO:__main__:Published notification to Redis for ride c24cbe27-7cfe-4c91-9e6a-f34bf6e3f4b5
+INFO:__main__:Worker received new ride: {'type': 'NEW_RIDE', 'ride_id': '9606d06f-44c3-403e-9831-722f0ae00356', 'origin': 'Praça da Sé, SP', 'destination': 'Av. Paulista, SP', 'price': 22.5, 'distance': 5.0, 'timestamp': '2025-12-17T04:28:46.057719'}
+INFO:__main__:Published notification to Redis for ride 9606d06f-44c3-403e-9831-722f0ae00356

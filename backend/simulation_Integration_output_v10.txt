@@ -1,0 +1,13 @@
+🚀 Starting Ibora Mobi Ride Simulation...
+
+[1] Creating Passenger...
+    Passenger User Created: user_259fd9a0@example.com
+    Passenger Profile Created: bcc282ab-4249-426d-a969-0e2b727fffc2
+
+[2] Creating Driver...
+    Driver User Created: user_a2b189cc@example.com
+    Driver Profile Created: 480975f9-9dbb-43ef-ba45-ba4ca86cf290
+    Vehicle: Corolla (HCK0706)
+
+[3] Requesting Ride...
+Failed to request ride: Internal Server Error

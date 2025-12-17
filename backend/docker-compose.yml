@@ -34,6 +34,18 @@ services:
     cpus: "0.5"
     command: ["redis-server", "--maxmemory", "200mb", "--maxmemory-policy", "allkeys-lru"]
 
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: ibora-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    mem_limit: 512m
+    cpus: "0.5"
+
   backend:
     build: .
     container_name: ibora-backend

@@ -1,0 +1,32 @@
+🚀 Starting Ibora Mobi Ride Simulation...
+
+[1] Creating Passenger...
+    Passenger User Created: user_c7cb6e34@example.com
+    Passenger Profile Created: a4cda8bf-a0f2-4c0c-896c-b30d16fcf0db
+    [Finance] Adding Balance (Topup)...
+    Balance Added: R$ 100.00
+
+[2] Creating Driver...
+    Driver User Created: user_32e65500@example.com
+    Driver Profile Created: 0388a190-76c8-4a1e-ba0c-6f0f9a01c9b2
+    Vehicle: Corolla (DHY4377)
+
+[3] Requesting Ride...
+    Ride Requested: 9606d06f-44c3-403e-9831-722f0ae00356
+    Status: REQUESTED
+    Estimated Price: R$ 22.50
+
+[4] Accepting Ride (Driver)...
+    Ride Accepted by: Jane Driver
+    Status: ACCEPTED
+
+[5] Starting Ride...
+    Ride Started at: 2025-12-17T07:28:46.090108Z
+    Status: STARTED
+
+[6] Finishing Ride...
+    Ride Completed at: 2025-12-17T07:28:46.097335Z
+    Status: COMPLETED
+    Final Price: R$ 22.50
+
+✅ Simulation Completed Successfully!
