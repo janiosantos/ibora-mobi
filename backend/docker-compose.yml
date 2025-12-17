@@ -1,0 +1,53 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: ibora-postgres
+    environment:
+      POSTGRES_DB: ibora
+      POSTGRES_USER: ibora
+      POSTGRES_PASSWORD: ibora
+    ports:
+      - "1332:5432"
+    volumes:
+      - ibora_pgdata:/var/lib/postgresql/data
+    mem_limit: 1536m
+    cpus: "1.0"
+    command:
+      - "postgres"
+      - "-c"
+      - "shared_buffers=256MB"
+      - "-c"
+      - "work_mem=8MB"
+      - "-c"
+      - "maintenance_work_mem=128MB"
+      - "-c"
+      - "max_connections=100"
+
+  redis:
+    image: redis:7
+    container_name: ibora-redis
+    ports:
+      - "1379:6379"
+    volumes:
+      - ibora_redisdata:/data
+    mem_limit: 256m
+    cpus: "0.5"
+    command: ["redis-server", "--maxmemory", "200mb", "--maxmemory-policy", "allkeys-lru"]
+
+  backend:
+    build: .
+    container_name: ibora-backend
+    env_file:
+      - .env.docker
+    ports:
+      - "1300:8000"
+    depends_on:
+      - postgres
+      - redis
+    command: python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    mem_limit: 768m
+    cpus: "1.0"
+
+volumes:
+  ibora_pgdata:
+  ibora_redisdata:

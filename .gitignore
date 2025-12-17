@@ -1,0 +1,19 @@
+# Python
+**/.venv/
+**/__pycache__/
+**/*.pyc
+**/.pytest_cache/
+
+# Env
+**/.env
+
+# Alembic
+**/alembic.ini
+
+# Node/Frontend
+**/node_modules/
+**/.next/
+**/dist/
+
+# IDE
+**/.vscode/

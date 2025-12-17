@@ -1,0 +1,22 @@
+Sim, em 2025 existem ferramentas de IA chamadas AI App Builders que permitem gerar layouts completos e funcionais apenas com comandos de voz ou texto. Para um desenvolvedor que quer fugir do design, estas são as melhores opções: 
+1. v0.dev (da Vercel)
+É a ferramenta definitiva para gerar interfaces em React com Tailwind CSS.
+Como funciona: Você escreve: "Crie uma tela de busca de motorista tipo Uber, com um mapa de fundo (placeholder), uma barra de busca flutuante no topo e um seletor de categorias de veículos na parte inferior".
+Resultado: Ele gera o código React limpo, que você pode copiar e colar no seu projeto ou baixar como um componente pronto. 
+2. Bolt.new
+Diferente do v0, o Bolt.new cria a aplicação inteira (Full-stack) no seu navegador.
+Destaque: Ele já configura o ambiente, instala as dependências (como bibliotecas de mapas) e permite que você veja o app rodando em tempo real enquanto a IA escreve o código.
+Ideal para: Criar um MVP (Mínimo Produto Viável) funcional de mobilidade urbana em minutos. 
+3. Cursor (Visual Editor)
+Se você prefere trabalhar dentro do editor de código, a versão 2.0 do Cursor (lançada no final de 2025) introduziu o Visual Editor. 
+Vantagem: Você pode "desenhar" pedindo alterações por chat diretamente no código. Ele entende o contexto do seu projeto e sugere componentes que já seguem o padrão visual do seu app. 
+4. RapidNative
+Se o seu foco for um app Mobile nativo (iOS/Android) usando React Native, esta ferramenta é a mais recomendada em 2025.
+Funcionalidade: Ela transforma comandos em inglês simples em projetos React Native estruturados com NativeWind (Tailwind para mobile), prontos para serem publicados ou exportados para o Expo. 
+Os modelos de IA recomendados para codificação incluem:
+Claude 3.7 Sonnet: Este modelo é considerado o melhor para seguir instruções de design e gerar código React limpo e modular.
+Gemini 2.5 Flash: Este modelo oferece uma boa relação custo-benefício e é rápido para gerar componentes de interface. 
+É recomendado começar com o v0.dev para gerar as telas e, em seguida, usar o Bolt.new para uma estrutura de projeto configurada com rotas e lógica inicial.
+
+
+
