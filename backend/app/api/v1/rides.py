@@ -109,16 +109,20 @@ async def request_ride(
     ride = await RideService.create_ride_request(current_user, ride_in, db)
     
     # Notify nearby drivers via RabbitMQ
-    # This could be moved to RideService or a separate EventService
-    await publish_message("new_rides_available", {
-        "type": "NEW_RIDE",
-        "ride_id": str(ride.id),
-        "origin": ride.origin_address,
-        "destination": ride.destination_address,
-        "price": float(ride.estimated_price) if ride.estimated_price else 0.0,
-        "distance": float(ride.distance_km) if ride.distance_km else 0.0,
-        "timestamp": datetime.utcnow().isoformat()
-    })
+    try:
+        await publish_message("new_rides_available", {
+            "type": "NEW_RIDE",
+            "ride_id": str(ride.id),
+            "origin": ride.origin_address,
+            "destination": ride.destination_address,
+            "price": float(ride.estimated_price) if ride.estimated_price else 0.0,
+            "distance": float(ride.distance_km) if ride.distance_km else 0.0,
+            "timestamp": datetime.utcnow().isoformat()
+        })
+    except Exception as e:
+        logger.error(f"Failed to publish new_ride_request: {e}")
+        # Don't block the ride creation if MQ fails
+        
     return ride
 
 @router.post("/{ride_id}/accept", response_model=ride_schema.Ride)

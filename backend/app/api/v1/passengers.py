@@ -85,6 +85,29 @@ async def read_passenger_me(
         raise HTTPException(status_code=404, detail="Passenger profile not found")
     return passenger
 
+@router.put("/me/profile", response_model=passenger_schema.Passenger)
+async def update_passenger_profile(
+    passenger_in: passenger_schema.PassengerUpdate,
+    db: AsyncSession = Depends(database.get_db),
+    current_user: User = Depends(get_current_user),
+) -> Any:
+    """
+    Update current passenger profile.
+    """
+    result = await db.execute(select(Passenger).where(Passenger.user_id == current_user.id))
+    passenger = result.scalars().first()
+    if not passenger:
+        raise HTTPException(status_code=404, detail="Passenger profile not found")
+        
+    update_data = passenger_in.model_dump(exclude_unset=True)
+    for field, value in update_data.items():
+        setattr(passenger, field, value)
+        
+    db.add(passenger)
+    await db.commit()
+    await db.refresh(passenger)
+    return passenger
+
 from app.schemas.driver import Driver as DriverSchema
 # Or we can create a lightweight schema for map display (id, lat, lon, heading, vehicle_type)
 from pydantic import BaseModel

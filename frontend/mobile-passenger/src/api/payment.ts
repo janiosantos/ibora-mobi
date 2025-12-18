@@ -29,6 +29,6 @@ export const paymentApi = {
     },
 
     async setDefaultPaymentMethod(id: number): Promise<void> {
-        return apiClient.put(`/payment-methods/${id}/default`);
+        return apiClient.put(`/payment-methods/${id}/set-default`);
     }
 };
