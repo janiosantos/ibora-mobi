@@ -78,7 +78,7 @@ export default function LoginScreen({ navigation }: any) {
                     )}
                 </TouchableOpacity>
 
-                <TouchableOpacity onPress={() => Alert.alert('Info', 'Funcionalidade de cadastro em breve')}>
+                <TouchableOpacity onPress={() => navigation.navigate('Register')}>
                     <Text style={styles.link}>Não tem conta? Cadastre-se</Text>
                 </TouchableOpacity>
             </View>

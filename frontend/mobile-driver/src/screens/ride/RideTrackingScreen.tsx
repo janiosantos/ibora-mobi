@@ -88,7 +88,8 @@ export default function RideTrackingScreen({ route, navigation }: any) {
             </MapView>
 
             <TouchableOpacity style={[styles.navButton, { top: insets.top + 10 }]} onPress={openNavigation}>
-                <Ionicons name="navigate-circle" size={40} color="#007AFF" />
+                <View style={{ width: 40, height: 40, backgroundColor: 'blue' }} />
+                {/* <Ionicons name="navigate-circle" size={40} color="#007AFF" /> */}
             </TouchableOpacity>
 
             <View style={[styles.bottomCard, { paddingBottom: insets.bottom + 20 }]}>
@@ -99,7 +100,8 @@ export default function RideTrackingScreen({ route, navigation }: any) {
                 </Text>
 
                 <View style={styles.passengerInfo}>
-                    <Ionicons name="person-circle" size={50} color="#ccc" />
+                    <View style={{ width: 50, height: 50, backgroundColor: '#ccc' }} />
+                    {/* <Ionicons name="person-circle" size={50} color="#ccc" /> */}
                     <View style={{ marginLeft: 15 }}>
                         <Text style={styles.passengerName}>Passageiro (Mock)</Text>
                         <Text style={styles.rating}>⭐ 5.0</Text>

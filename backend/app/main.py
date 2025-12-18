@@ -23,7 +23,12 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
+
+from app.middleware.logging_middleware import RequestLoggingMiddleware
+app.add_middleware(RequestLoggingMiddleware)
 
 app.include_router(api_router, prefix=settings.API_V1_STR)
 

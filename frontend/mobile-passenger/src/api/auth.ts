@@ -26,6 +26,10 @@ export const authApi = {
         });
     },
 
+    async signup(userData: any): Promise<any> {
+        return apiClient.post('/auth/signup', userData);
+    },
+
     async getProfile(): Promise<any> {
         return apiClient.get('/passengers/me');
     },

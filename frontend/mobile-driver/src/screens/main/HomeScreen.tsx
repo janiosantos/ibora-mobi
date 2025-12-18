@@ -7,6 +7,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { socketService } from '../../api/socket';
 import { rideApi } from '../../api/ride'; // Need to create/ensure this exists
 import { useFocusEffect } from '@react-navigation/native';
+import { useAuthStore } from '../../store/authStore';
 
 const { width, height } = Dimensions.get('window');
 const ASPECT_RATIO = width / height;
@@ -16,6 +17,7 @@ const LONGITUDE_DELTA = LATITUDE_DELTA * ASPECT_RATIO;
 export default function HomeScreen({ navigation }: any) {
     const insets = useSafeAreaInsets();
     const mapRef = useRef<MapView>(null);
+    const { logout } = useAuthStore();
 
     const [isOnline, setIsOnline] = useState(false);
     const [location, setLocation] = useState<Location.LocationObject | null>(null);
@@ -129,6 +131,9 @@ export default function HomeScreen({ navigation }: any) {
                     trackColor={{ false: '#767577', true: '#81b0ff' }}
                     thumbColor={isOnline ? '#007AFF' : '#f4f3f4'}
                 />
+                <TouchableOpacity onPress={logout} style={{ marginLeft: 15 }}>
+                    <Ionicons name="log-out-outline" size={24} color="#333" />
+                </TouchableOpacity>
             </View>
 
             {/* Ride Request Modal/Card */}

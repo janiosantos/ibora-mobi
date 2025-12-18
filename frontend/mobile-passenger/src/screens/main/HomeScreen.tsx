@@ -12,10 +12,23 @@ import { socketService } from '../../api/socket';
 import { useDriverAnimation } from '../../hooks/useDriverAnimation';
 import { useMapAutoZoom } from '../../hooks/useMapAutoZoom';
 import RoutePolyline from '../../components/RoutePolyline';
+import { useAuthStore } from '../../store/authStore';
 
 export default function HomeScreen({ navigation }: any) {
     const mapRef = useRef<MapView>(null);
     const insets = useSafeAreaInsets();
+    const { logout } = useAuthStore();
+
+    const handleLogout = async () => {
+        Alert.alert(
+            "Sair",
+            "Deseja sair da conta?",
+            [
+                { text: "Cancelar", style: "cancel" },
+                { text: "Sair", style: "destructive", onPress: () => logout() }
+            ]
+        );
+    };
 
     const [currentLocation, setCurrentLocation] = useState<Region>({
         latitude: -23.55052,
@@ -313,6 +326,19 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontWeight: 'bold',
         fontSize: 16
+    },
+    logoutButton: {
+        position: 'absolute',
+        right: 20,
+        zIndex: 50, // Top of map
+        backgroundColor: 'rgba(255,255,255,0.9)',
+        padding: 10,
+        borderRadius: 20,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 4,
+        elevation: 5,
     },
     estHeader: {
         flexDirection: 'row',

@@ -48,6 +48,21 @@ async def create_user_signup(
             detail="The user with this email already exists in the system.",
         )
     user = await create_user(db, user=user_in)
+    
+    # Auto-create profile based on user type
+    if user.user_type == "passenger":
+        from app.modules.passengers.models.passenger import Passenger
+        passenger = Passenger(
+            user_id=user.id,
+            full_name=user.email.split("@")[0].capitalize(), # Placeholder name
+            email=user.email,
+            phone=user.phone or "0000000000",
+            status="active"
+        )
+        db.add(passenger)
+        await db.commit()
+        await db.refresh(passenger)
+        
     return user
 
 @router.post("/login/access-token", response_model=token_schema.Token)

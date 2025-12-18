@@ -106,7 +106,16 @@ async def request_ride(
     if current_user.user_type != "passenger":
         raise HTTPException(status_code=400, detail="Only passengers can request rides")
     
-    ride = await RideService.create_ride_request(current_user, ride_in, db)
+    try:
+        ride = await RideService.create_ride_request(current_user, ride_in, db)
+    except ValueError as e:
+        logger.error(f"Ride creation validation error: {e}")
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        logger.error(f"Ride creation unexpected error: {e}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")
     
     # Notify nearby drivers via RabbitMQ
     try:

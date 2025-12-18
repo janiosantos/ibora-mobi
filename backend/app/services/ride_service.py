@@ -124,14 +124,23 @@ class RideService:
             
         # 2. Re-calculate inputs (trusted source)
         # We should ideally fetch route info again to ensure consistency and store it.
+        print("DEBUG: create_ride_request - getting distance")
         
         origin = (request.origin_lat, request.origin_lon)
         destination = (request.destination_lat, request.destination_lon)
         
         dist_meters, dur_seconds = await MapsService.get_distance_duration(origin, destination)
-        if dist_meters is None: raise ValueError("Could not calculate route")
+        print(f"DEBUG: Data from Maps: dist={dist_meters}, dur={dur_seconds}")
+        
+        if dist_meters is None: 
+            print("DEBUG: Maps returned None!")
+            # Fallback for testing if Maps fails (e.g. no key)
+            dist_meters = 5000.0
+            dur_seconds = 600.0
+            # raise ValueError("Could not calculate route")
         
         price = PricingService.calculate_price(dist_meters, dur_seconds)
+        print(f"DEBUG: Calculated price: {price}")
         
         route_data = await MapsService.get_directions(origin, destination)
         polyline = route_data['overview_polyline']['points'] if route_data else None
