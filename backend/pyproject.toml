@@ -32,6 +32,8 @@ googlemaps = "^4.10.0"
 polyline = "^2.0.4"
 gerencianet = "^3.0.0"
 apscheduler = "^3.11.1"
+stripe = "^14.1.0"
+mercadopago = "^2.3.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.0.0"

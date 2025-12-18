@@ -86,10 +86,33 @@ async def read_driver_me(
     """
     Get current driver profile.
     """
-    result = await db.execute(select(Driver).where(Driver.user_id == current_user.id))
+    result = await db.execute(select(Driver).options(selectinload(Driver.vehicles)).where(Driver.user_id == current_user.id))
     driver = result.scalars().first()
     if not driver:
         raise HTTPException(status_code=404, detail="Driver profile not found")
+    return driver
+
+@router.put("/me/profile", response_model=driver_schema.Driver)
+async def update_driver_profile(
+    driver_in: driver_schema.DriverUpdate,
+    db: AsyncSession = Depends(database.get_db),
+    current_user: User = Depends(deps.get_current_user),
+) -> Any:
+    """
+    Update current driver profile.
+    """
+    result = await db.execute(select(Driver).options(selectinload(Driver.vehicles)).where(Driver.user_id == current_user.id))
+    driver = result.scalars().first()
+    if not driver:
+        raise HTTPException(status_code=404, detail="Driver profile not found")
+        
+    update_data = driver_in.model_dump(exclude_unset=True)
+    for field, value in update_data.items():
+        setattr(driver, field, value)
+        
+    db.add(driver)
+    await db.commit()
+    await db.refresh(driver)
     return driver
 
 @router.post("/me/status", response_model=driver_schema.Driver)
@@ -101,7 +124,7 @@ async def update_driver_status(
     """
     Update driver online status (online/offline).
     """
-    result = await db.execute(select(Driver).where(Driver.user_id == current_user.id))
+    result = await db.execute(select(Driver).options(selectinload(Driver.vehicles)).where(Driver.user_id == current_user.id))
     driver = result.scalars().first()
     if not driver:
         raise HTTPException(status_code=404, detail="Driver profile not found")
@@ -135,7 +158,7 @@ async def update_driver_location(
     """
     Update driver location.
     """
-    result = await db.execute(select(Driver).where(Driver.user_id == current_user.id))
+    result = await db.execute(select(Driver).options(selectinload(Driver.vehicles)).where(Driver.user_id == current_user.id))
     driver = result.scalars().first()
     if not driver:
         raise HTTPException(status_code=404, detail="Driver profile not found")

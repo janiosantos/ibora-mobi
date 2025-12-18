@@ -11,6 +11,7 @@ from app.modules.finance.models.ledger import LedgerAccount, LedgerEntry, Ledger
 from app.modules.drivers.models.driver import Driver
 from app.modules.rides.models.ride import Ride
 from app.services.ledger_service import LedgerService
+from app.services.payment.efi_client import efi_client
 # from app.core.events import event_bus # If exists
 
 class PayoutService:
@@ -154,6 +155,8 @@ class PayoutService:
         
         return payout
 
+
+
     async def process_payout(self, payout_id: UUID):
         payout = await self.db.get(Payout, payout_id)
         if not payout or payout.status != 'PENDING':
@@ -164,17 +167,23 @@ class PayoutService:
         await self.db.commit()
         
         try:
-            # Mock Gateway Call
-            # await efi_client.pay(...)
-            txid = f"mock_tx_{payout.id}"
+            # Real Gateway Call
+            amount_float = float(payout.amount)
+            pix_key = payout.bank_details.get("pix_key")
+            
+            if not pix_key:
+                raise ValueError("Pix key missing in bank details")
+
+            result = efi_client.send_pix_transfer(
+                amount=amount_float,
+                pix_key=pix_key,
+                description=f"Ibora Payout {payout.id}"
+            )
             
             payout.status = 'COMPLETED'
-            payout.provider_transaction_id = txid
+            payout.provider_transaction_id = result.get('e2eId')
             payout.completed_at = datetime.now(timezone.utc)
-            
-            # No additional ledger entry needed if we already credited Bank in `create_payout`?
-            # Blueprint logic seems to do the accounting AT payout creation (Reservation).
-            # If it fails, we REVERSE it.
+            payout.provider_response = result
             
         except Exception as e:
             payout.status = 'FAILED'

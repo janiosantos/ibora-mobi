@@ -56,7 +56,8 @@ class WalletService:
         # Includes Earnings (+) and Withdrawals (-)
         stmt = select(func.sum(FinancialEvent.amount)).where(
             FinancialEvent.driver_id == driver_id,
-            FinancialEvent.status == EventStatus.COMPLETED
+            FinancialEvent.status == EventStatus.COMPLETED,
+            FinancialEvent.event_type != EventType.PLATFORM_COMMISSION
         )
         result = await db.execute(stmt)
         total_balance = Decimal(str(result.scalar() or 0))

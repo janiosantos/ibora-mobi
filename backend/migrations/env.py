@@ -22,7 +22,10 @@ from app.modules.finance.models.financial_event import FinancialEvent
 from app.modules.finance.models.payment import Payment
 from app.modules.incentives.models.campaign import Campaign, DriverMetric, DriverIncentive
 from app.modules.finance.models.wallet import DriverWallet
+from app.modules.finance.models.wallet import DriverWallet
 from app.modules.finance.models.settlement import Settlement
+from app.modules.finance.models.payment_method import PaymentMethod
+from app.modules.notifications.models.notification import Notification
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

@@ -35,12 +35,27 @@ class EfiClient:
         except Exception as e:
             logger.error(f"Failed to initialize Efí client: {e}")
 
-    def create_immediate_charge(
+    async def create_evp_key(self) -> str:
+        """Create a random EVP key"""
+        if not self.gn:
+            raise RuntimeError("Efí client is not initialized.")
+        try:
+             response = self.gn.pix_create_evp()
+             logger.info(f"Create EVP Response: {response}")
+             key = response.get('chave')
+             settings.EFI_PIX_KEY = key # Update simplified
+             logger.info(f"Created EVP Key: {key}")
+             return key
+        except Exception as e:
+             logger.error(f"Error creating EVP key: {e}")
+             raise e
+
+    async def create_pix_charge(
         self,
-        amount: float,
-        description: str,
-        expiration: int = 3600,  # 1 hour
-        additional_info: dict = None
+        value: float,
+        payer: dict = None,
+        txid: str = None,
+        expiration: int = 3600
     ) -> dict:
         """
         Create immediate Pix charge
@@ -49,32 +64,35 @@ class EfiClient:
             raise RuntimeError("Efí client is not initialized.")
 
         try:
+            # Use dynamically set key if available, else settings
+            current_key = settings.EFI_PIX_KEY or await self.create_evp_key()
+            
             body = {
                 'calendario': {
                     'expiracao': expiration
                 },
                 'valor': {
-                    'original': f'{amount:.2f}' # Must be string with 2 decimals
+                    'original': f'{value:.2f}'
                 },
-                'chave': settings.EFI_PIX_KEY,
-                'solicitacaoPagador': description
+                'chave': current_key,
+                'solicitacaoPagador': "Charge"
             }
             
-            if additional_info:
-                body['infoAdicionais'] = [
-                    {'nome': k, 'valor': str(v)}
-                    for k, v in additional_info.items()
-                ]
+            if payer:
+                body['devedor'] = payer
+
+            logger.info(f"Creating Pix Charge with key {current_key}...")
             
-            # Create charge (txid)
+            # Run blocking call in executor? 
+            # ideally: await asyncio.to_thread(self.gn.pix_create_immediate_charge, body=body)
+            # For this quick fix, just async def (still blocking but works with await).
+            
             response = self.gn.pix_create_immediate_charge(body=body)
             
             if 'txid' not in response:
                  raise ValueError(f"No txid in response: {response}")
 
-            # Get QR Code
             loc_id = response['loc']['id']
-            # params = {'id': loc_id} # SDK expects params as dict
             qrcode_response = self.gn.pix_generate_QRCode(params={'id': loc_id})
             
             result = {
@@ -83,17 +101,17 @@ class EfiClient:
                 'qrcode_image': qrcode_response.get('imagemQrcode'),
                 'qrcode_text': qrcode_response.get('qrcode'),
                 'expiration': expiration,
-                'amount': amount
+                'amount': value
             }
             
-            logger.info(f"Pix charge created: txid={result['txid']}, amount=R${amount}")
+            logger.info(f"Pix charge created: txid={result['txid']}, amount=R${value}")
             return result
         
         except Exception as e:
             logger.error(f"Error creating Pix charge: {e}")
             raise ValueError(f"Failed to create Pix charge: {str(e)}")
 
-    def get_charge_status(self, txid: str) -> dict:
+    async def get_charge_status(self, txid: str) -> dict:
         """Get charge status"""
         if not self.gn:
            raise RuntimeError("Efí client is not initialized.")
@@ -115,6 +133,67 @@ class EfiClient:
         except Exception as e:
             logger.error(f"Error getting charge status for txid={txid}: {e}")
             raise ValueError(f"Failed to get charge status: {str(e)}")
+
+    async def send_pix_transfer(
+        self,
+        amount: float,
+        pix_key: str,
+        description: str = "Payout"
+    ) -> dict:
+        """
+        Send Pix transfer to a key
+        """
+        if not self.gn:
+            raise RuntimeError("Efí client is not initialized.")
+            
+        try:
+            # Use dynamically set key if available, else settings
+            current_key = settings.EFI_PIX_KEY or await self.create_evp_key()
+            if not current_key and settings.EFI_SANDBOX:
+                 current_key = "efipay@sejaefi.com.br" # Fallback for sandbox
+
+            body = {
+                'valor': f'{amount:.2f}',
+                'pagador': {
+                    'chave': current_key
+                },
+                'favorecido': {
+                    'chave': pix_key
+                }
+            }
+            
+            # Generate idEnvio if not provided within description or separately?
+            # It's usually a unique ID for idempotency.
+            import secrets
+            id_envio = secrets.token_hex(16) # 32 chars
+            
+            # Send Pix
+            # SDK expects params={'idEnvio': ...}, body={...}
+            response = self.gn.pix_send(
+                params={'idEnvio': id_envio},
+                body=body
+            )
+            logger.info(f"Payout Response: {response}")
+            
+            if 'e2eId' not in response:
+                 # Some endpoints return e2eId, others might return txid?
+                 # Transfer usually returns e2eId.
+                 pass
+                 
+            result = {
+                'e2eId': response.get('e2eId'),
+                'id_envio': id_envio,
+                'status': response.get('status', 'SENT'),
+                'amount': amount,
+                'paid_at': response.get('horario')
+            }
+            
+            logger.info(f"Pix transfer sent: amount=R${amount} key={pix_key} e2eId={result.get('e2eId')}")
+            return result
+            
+        except Exception as e:
+            logger.error(f"Error sending Pix transfer: {e}")
+            raise ValueError(f"Failed to send Pix: {str(e)}")
 
 # Singleton instance
 efi_client = EfiClient()

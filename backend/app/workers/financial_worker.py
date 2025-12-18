@@ -7,9 +7,11 @@ import traceback
 
 from app.core.database import AsyncSessionLocal as async_session_factory
 from app.services.payout_service import PayoutService
+from app.services.settlement_service import SettlementService
 from app.modules.finance.models.payout import Payout
 from app.modules.finance.models.ledger import LedgerAccount, LedgerRunningBalance, LedgerEntry
 from app.core.logging import get_logger, configure_logging
+from app.services.reconciliation_service import ReconciliationService
 
 logger = get_logger(__name__)
 
@@ -35,6 +37,19 @@ async def process_pending_payouts():
                 logger.error("Error processing payout", payout_id=str(payout_id), error=str(e))
                 # traceback.print_exc()
 
+async def process_settlements():
+    """
+    Finds and processes due settlements (moving from Held to Available).
+    """
+    async with async_session_factory() as session:
+        try:
+            count = await SettlementService.process_due_settlements(session)
+            if count > 0:
+                logger.info(f"Processed {count} settlements")
+        except Exception as e:
+            logger.error("Error processing settlements", error=str(e))
+            traceback.print_exc()
+
 async def update_running_balances():
     """
     Updates running balances for active accounts.
@@ -57,12 +72,28 @@ async def update_running_balances():
             # For this demo, we just print/log. Real impl updates LedgerRunningBalance table.
             pass
 
+async def run_janitor():
+    """
+    Runs reconciliation of lost charges.
+    """
+    async with async_session_factory() as session:
+        try:
+            service = ReconciliationService(session)
+            count = await service.reconcile_lost_charges()
+            if count > 0:
+                logger.info(f"Janitor reconciled {count} charges")
+        except Exception as e:
+            logger.error("Janitor Error", error=str(e))
+            # traceback.print_exc()
+
 async def main():
     configure_logging()
     logger.info("Starting Financial Worker...")
     while True:
         try:
             await process_pending_payouts()
+            await process_settlements()
+            await run_janitor()
             # await update_running_balances()
         except Exception as e:
             logger.error("Worker Error", error=str(e))

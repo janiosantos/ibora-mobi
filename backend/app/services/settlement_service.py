@@ -126,4 +126,22 @@ class SettlementService:
             await WalletService.update_wallet(driver_id, db)
             
         logger.info(f"Released {count} settlements")
-        return count
+    @staticmethod
+    async def release_settlement(
+        settlement: Settlement,
+        db: AsyncSession
+    ):
+        """
+        Immediately release a specific settlement (e.g. for Cash payments)
+        """
+        if settlement.status == SettlementStatus.COMPLETED:
+            return
+
+        settlement.status = SettlementStatus.COMPLETED
+        settlement.processed_at = datetime.now(timezone.utc)
+        db.add(settlement)
+        await db.commit()
+        await db.refresh(settlement)
+        
+        await WalletService.update_wallet(settlement.driver_id, db)
+        logger.info(f"Released settlement {settlement.id} manually")

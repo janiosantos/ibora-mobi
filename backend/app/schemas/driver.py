@@ -47,3 +47,13 @@ class DriverLocationUpdate(BaseModel):
 class DriverStatusUpdate(BaseModel):
     status: str # online, offline 
     # Or strict Enum matching DriverOnlineStatus if possible, but str is flexible for input
+
+class DriverUpdate(BaseModel):
+    phone: Optional[str] = None
+    email: Optional[str] = None
+    bank_code: Optional[str] = None
+    bank_branch: Optional[str] = None
+    bank_account: Optional[str] = None
+    bank_account_type: Optional[str] = None
+    pix_key: Optional[str] = None
+    pix_key_type: Optional[str] = None

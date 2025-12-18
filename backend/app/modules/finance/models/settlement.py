@@ -4,6 +4,7 @@ from sqlalchemy.dialects.postgresql import UUID
 from app.core.base import Base
 from app.core.mixins import TimestampMixin
 import enum
+import uuid
 
 class SettlementStatus(str, enum.Enum):
     PENDING = "pending"
@@ -14,7 +15,7 @@ class SettlementStatus(str, enum.Enum):
 class Settlement(Base, TimestampMixin):
     __tablename__ = "settlements"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, index=True) # UUID primary key? Or Integer? 
+    id = Column(UUID(as_uuid=True), primary_key=True, index=True, default=uuid.uuid4) 
     # Let's use UUID to match other finance models if possible, or Integer if standard. 
     # Wallet uses UUID (driver_id). FinancialEvent uses Integer. 
     # Let's use Integer for ID to match FinancialEvent or UUID. 

@@ -117,9 +117,29 @@ async def pix_webhook_handler(
         payload = await request.json()
         logger.info(f"Received Webhook Payload: {payload}")
         
-        updated_count = await PaymentService.process_webhook_notification(payload, db)
+        updated_count = await PaymentService.process_efi_webhook(payload, db)
         
         return {"status": "ok", "processed": updated_count}
     except Exception as e:
         logger.error(f"Webhook processing error: {e}")
+        return {"status": "error", "message": str(e)}
+
+@router.post("/payments/webhook/mercadopago", include_in_schema=False)
+async def mercadopago_webhook_handler(
+    request: Request,
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Webhook handler for Mercado Pago notifications.
+    """
+    try:
+        payload = await request.json()
+        logger.info(f"Received MP Webhook: {payload}")
+        
+        from app.services.payment.mercadopago_service import MercadoPagoService
+        await MercadoPagoService.process_webhook(payload, db)
+        
+        return {"status": "ok"}
+    except Exception as e:
+        logger.error(f"MP Webhook error: {e}")
         return {"status": "error", "message": str(e)}

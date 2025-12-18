@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Integer, Numeric, DateTime, ForeignKey, CheckConstraint
+from sqlalchemy import Column, String, Integer, Numeric, DateTime, ForeignKey, CheckConstraint, Boolean
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
@@ -45,6 +45,10 @@ class Ride(Base):
     # Payment
     payment_method = Column(String(50), default='pix')
     payment_status = Column(String(50), default='pending') # pending, authorized, captured, refunded
+    
+    # Cash Payment Specific
+    cash_confirmed_by_driver = Column(Boolean, default=False)
+    cash_confirmed_at = Column(DateTime(timezone=True), nullable=True)
     
     # Relationships
     passenger = relationship("Passenger", backref="rides")

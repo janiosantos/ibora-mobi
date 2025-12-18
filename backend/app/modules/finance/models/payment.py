@@ -40,6 +40,10 @@ class Payment(Base):
     # External reference
     external_transaction_id = Column(String(255), nullable=True, index=True)
     
+    # Card Payment
+    payment_method_id = Column(Integer, ForeignKey("payment_methods.id"), nullable=True)
+    stripe_payment_intent_id = Column(String(255), nullable=True, index=True)
+    
     # Related events (Mapping for later reconciliation)
     payment_event_id = Column(Integer, ForeignKey("financial_events.id"), nullable=True)
     earning_event_id = Column(Integer, ForeignKey("financial_events.id"), nullable=True)
@@ -57,3 +61,6 @@ class Payment(Base):
     passenger = relationship("app.modules.passengers.models.passenger.Passenger")
     
     payment_event = relationship("app.modules.finance.models.financial_event.FinancialEvent", foreign_keys=[payment_event_id])
+    
+    # Card Relationship
+    card_payment_method = relationship("app.modules.finance.models.payment_method.PaymentMethod", foreign_keys=[payment_method_id])

@@ -2,9 +2,10 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Optional
 from datetime import datetime, timedelta
+from decimal import Decimal
 
 from app.core.database import get_db
-from app.modules.auth.dependencies import get_current_user
+from app.api.deps import get_current_user
 from app.modules.auth.models.user import User
 from app.modules.drivers.models.driver import Driver
 from app.services.wallet_service import WalletService
@@ -133,9 +134,17 @@ async def get_wallet_transactions(
     """
     Get wallet transaction history
     """
+    from sqlalchemy import or_, and_
+    
     stmt = select(FinancialEvent).where(
         FinancialEvent.driver_id == driver.id,
-        FinancialEvent.status == EventStatus.COMPLETED
+        or_(
+             FinancialEvent.status == EventStatus.COMPLETED,
+             and_(
+                 FinancialEvent.status == EventStatus.PENDING,
+                 FinancialEvent.event_type == EventType.WALLET_WITHDRAWAL
+             )
+        )
     )
     
     if transaction_type == "earning":

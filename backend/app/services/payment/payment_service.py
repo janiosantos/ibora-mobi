@@ -122,29 +122,65 @@ class PaymentService:
                 
                 logger.info(f"Payment completed: payment_id={payment.id}")
                 
-                # Trigger financial events completion (Task 4.3 maybe? Or here?)
-                # Plan mentioned trigger financial events completion.
-                # Since events were created PENDING by RidePaymentService, we need to COMPLETE them now.
-                # But Payment model needs to store event_ids first.
-                # In RidePaymentService we created events but didn't link them to Payment record (Payment didn't exist).
-                # Wait, RidePaymentService runs AT END OF RIDE?
-                # Process:
-                # 1. Ride Ends -> RidePaymentService creates FinancialEvents (PENDING).
-                # 2. Passenger requests Payment -> PaymentService creates Payment (Pix).
-                #    Ideally Payment record should link to FinancialEvent(RIDE_PAYMENT).
+                # Trigger Settlement Release (Immediate for Pix)
+                from app.services.settlement_service import SettlementService
+                from app.modules.finance.models.settlement import Settlement
+                from app.modules.finance.models.financial_event import FinancialEvent, EventType
                 
-                # So we should find the FinancialEvent for this ride/passenger and link it?
-                # or RidePaymentService should have returned IDs (it did) and we stored them?
-                # But Payment is created LATER via API.
+                # Find Earning Event for this Ride
+                stmt = select(FinancialEvent).where(
+                    FinancialEvent.ride_id == payment.ride_id,
+                    FinancialEvent.event_type == EventType.RIDE_EARNING
+                )
+                res_event = await db.execute(stmt)
+                earning_event = res_event.scalars().first()
                 
-                # Let's find pending payment event for this ride
-                # from app.modules.finance.models.financial_event import FinancialEvent, EventType
-                # stmt = select(FinancialEvent).where(
-                #     FinancialEvent.ride_id == payment.ride_id,
-                #     FinancialEvent.event_type == EventType.RIDE_PAYMENT
-                # )
-                # ...
-                # For now just update Payment status. Linking logic might be in a separate step or improved later.
+                if earning_event:
+                     # Find Settlement
+                     stmt_stl = select(Settlement).where(Settlement.financial_event_id == earning_event.id)
+                     res_stl = await db.execute(stmt_stl)
+                     settlement = res_stl.scalars().first()
+                     
+                     if settlement:
+                         await SettlementService.release_settlement(settlement, db)
+                         logger.info(f"Released settlement {settlement.id} for Pix payment {payment.id}")
+                
+                     # Notify Users (Passenger & Driver)
+                     from app.core.websocket import manager
+                     from app.services.notification_service import NotificationService
+                     
+                     # Notify Passenger (Payment Confirmed)
+                     await manager.send_personal_message({
+                         "type": "PAYMENT_CONFIRMED",
+                         "ride_id": str(payment.ride_id),
+                         "amount": payment.amount,
+                         "status": "COMPLETED"
+                     }, str(payment.passenger_id))
+                     
+                     await NotificationService(db).create_notification(
+                        user_id=payment.passenger_id,
+                        title="Payment Confirmed",
+                        message=f"Pix payment of R${payment.amount:.2f} confirmed.",
+                        type="PAYMENT"
+                     )
+                     
+                     # Notify Driver (Funds Received)
+                     if settlement: # or use earning_event.driver_id
+                         await manager.send_personal_message({
+                             "type": "FUNDS_RECEIVED",
+                             "ride_id": str(payment.ride_id),
+                             "amount": payment.amount, # or earning amount? let's show gross for now
+                             "source": "Pix"
+                         }, str(settlement.driver_id))
+                         
+                         await NotificationService(db).create_notification(
+                            user_id=settlement.driver_id,
+                            title="Funds Received",
+                            message=f"Received payment for Ride {payment.ride_id}.",
+                            type="FINANCE"
+                         )
+                else:
+                    logger.warning(f"No earning event found for ride {payment.ride_id} during Pix confirmation. Financial events might be missing.")
         
         except Exception as e:
             logger.error(f"Error checking payment status: {e}")
@@ -152,7 +188,7 @@ class PaymentService:
         return payment
 
     @staticmethod
-    async def process_webhook_notification(payload: dict, db: AsyncSession) -> int:
+    async def process_efi_webhook(payload: dict, db: AsyncSession) -> int:
         """
         Process incoming Pix webhook notification
         

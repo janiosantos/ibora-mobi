@@ -60,7 +60,7 @@ class RidePaymentService:
         # We will cast to float for FinancialEvent as it expects Float in strict typing usually, 
         # though SQLAlchemy might handle Decimal to Float. Let's be explicit.
         
-        total_price_decimal = ride.final_price
+        total_price_decimal = Decimal(str(ride.final_price))
         driver_earning_decimal = PricingService.calculate_driver_earnings(total_price_decimal)
         commission_decimal = total_price_decimal - driver_earning_decimal
         

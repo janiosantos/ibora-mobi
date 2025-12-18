@@ -53,12 +53,33 @@ class Settings(BaseSettings):
     # Efí Bank (Pix)
     EFI_CLIENT_ID: Optional[str] = "Client_Id_d45febcef25500d2ff3b56fbf32b9a61b30dea2a"
     EFI_CLIENT_SECRET: Optional[str] = "Client_Secret_09c6be42a50a96c9a38c0074e0ba7a104c63a7a9"
-    EFI_CERTIFICATE_PATH: Optional[str] = "/home/jpsantos/Projetos-dev/ibora-mobi/efi-ibora-mobi-test.p12"
+    EFI_CERTIFICATE_PATH: Optional[str] = "/home/jpsantos/Projetos-dev/ibora-mobi/backend/efi-cert.pem"
     EFI_SANDBOX: bool = True
-    EFI_PIX_KEY: Optional[str] = None
+    EFI_PIX_KEY: Optional[str] = "efipay@sejaefi.com.br"
+
+    # Mercado Pago
+    MP_CLIENT_ID: Optional[str] = "127924860584293"
+    MP_CLIENT_SECRET: Optional[str] = "g9hOmBe5AYyvha9fUZhKToP2CZcygKqe"
+    MP_SANDBOX: bool = True
+    MP_SANDBOX_ACCESS_TOKEN: Optional[str] = "TEST-6418849900362609-121801-ead6d9a1eebf0723ba14c95a9012a1b3-184641661"
+    MP_SANDBOX_PUBLIC_KEY: Optional[str] = "TEST-b7a92a06-583f-4b42-a8ca-92c68adc5e24"
+    MP_SANDBOX_WEBHOOK_SECRET: Optional[str] = None         
+    MP_SANDBOX_WEBHOOK_URL: Optional[str] = None                            
 
     # Google Maps
     GOOGLE_MAPS_API_KEY: Optional[str] = None
+
+    # Mercado Pago
+    MERCADOPAGO_ACCESS_TOKEN: Optional[str] = MP_SANDBOX_ACCESS_TOKEN
+    MERCADOPAGO_PUBLIC_KEY: Optional[str] = MP_SANDBOX_PUBLIC_KEY
+
+    # Stripe
+    STRIPE_SECRET_KEY: Optional[str] = None
+    STRIPE_PUBLISHABLE_KEY: Optional[str] = None
+    STRIPE_WEBHOOK_SECRET: Optional[str] = None
+    STRIPE_API_VERSION: str = "2023-10-16"
+    CURRENCY: str = "BRL"
+    PLATFORM_FEE_PERCENTAGE: float = 0.15
 
     model_config = SettingsConfigDict(
         env_file=".env",

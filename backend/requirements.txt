@@ -12,3 +12,4 @@ python-json-logger==2.0.7
 
 pytest==8.3.3
 pytest-asyncio==0.24.0
+stripe==10.12.0

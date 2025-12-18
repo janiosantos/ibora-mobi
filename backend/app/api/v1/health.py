@@ -10,9 +10,19 @@ router = APIRouter()
 logger = logging.getLogger(__name__)
 
 @router.get("/health", status_code=status.HTTP_200_OK)
-async def health_check(response: Response):
+async def health_check():
+    """
+    Liveness probe: Just checks if the API is responding.
+    """
+    return {"status": "ok"}
+
+@router.get("/health/ready", status_code=status.HTTP_200_OK)
+async def readiness_check(response: Response):
+    """
+    Readiness probe: Checks dependencies (DB, Redis, RabbitMQ).
+    """
     health_status = {
-        "status": "ok",
+        "status": "ready",
         "components": {
             "postgres": "unknown",
             "redis": "unknown",
@@ -45,6 +55,7 @@ async def health_check(response: Response):
     # 3. RabbitMQ Check
     try:
         rabbitmq_url = getattr(settings, "RABBITMQ_URL", "amqp://guest:guest@localhost/")
+        # Simple check: try to connect
         connection = await rabbitmq_connect(rabbitmq_url)
         await connection.close()
         health_status["components"]["rabbitmq"] = "up"
@@ -53,7 +64,7 @@ async def health_check(response: Response):
         overall_healthy = False
     
     if not overall_healthy:
-        health_status["status"] = "degraded"
+        health_status["status"] = "not_ready"
         response.status_code = status.HTTP_503_SERVICE_UNAVAILABLE
         
     return health_status

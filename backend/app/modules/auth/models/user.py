@@ -24,6 +24,9 @@ class User(Base):
     mfa_enabled = Column(Boolean, default=False)
     mfa_secret = Column(String(255))
     
+    stripe_customer_id = Column(String(255), unique=True, index=True, nullable=True)
+    mercadopago_customer_id = Column(String(255), unique=True, index=True, nullable=True)
+    
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
     last_login_at = Column(DateTime(timezone=True))

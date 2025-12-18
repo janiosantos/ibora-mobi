@@ -39,8 +39,6 @@ def upgrade() -> None:
     op.create_index(op.f('ix_settlements_id'), 'settlements', ['id'], unique=False)
     op.create_index(op.f('ix_settlements_scheduled_for'), 'settlements', ['scheduled_for'], unique=False)
     op.create_index(op.f('ix_settlements_status'), 'settlements', ['status'], unique=False)
-    op.drop_table('spatial_ref_sys')
-    op.drop_index(op.f('ix_drivers_location'), table_name='drivers', postgresql_using='gist')
     # ### end Alembic commands ###
 
 
