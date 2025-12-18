@@ -1,0 +1,32 @@
+2025-12-18 14:19:15,652 - INFO - {
+  "timestamp": "2025-12-18T14:19:15.652642",
+  "method": "POST",
+  "url": "http://localhost:8000/api/v1/auth/login",
+  "status_code": 404,
+  "process_time_ms": 2.34,
+  "request_headers": {
+    "host": "localhost:8000",
+    "user-agent": "curl/7.53.1",
+    "accept": "*/*",
+    "content-type": "application/json",
+    "content-length": "43"
+  },
+  "request_body": "{\"email\": \"bad-email\", \"password\": \"short\"}",
+  "response_body": "{\"detail\":\"Not Found\"}"
+}
+2025-12-18 14:19:25,580 - INFO - {
+  "timestamp": "2025-12-18T14:19:25.580316",
+  "method": "POST",
+  "url": "http://localhost:8000/api/v1/auth/login",
+  "status_code": 404,
+  "process_time_ms": 1.9,
+  "request_headers": {
+    "host": "localhost:8000",
+    "user-agent": "curl/7.53.1",
+    "accept": "*/*",
+    "content-type": "application/json",
+    "content-length": "43"
+  },
+  "request_body": "{\"email\": \"bad-email\", \"password\": \"short\"}",
+  "response_body": "{\"detail\":\"Not Found\"}"
+}
