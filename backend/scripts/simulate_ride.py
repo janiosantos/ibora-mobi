@@ -5,7 +5,7 @@ import random
 from datetime import date
 
 # Config
-BASE_URL = "http://localhost:7000/api/v1"
+BASE_URL = "http://localhost:1300/api/v1"
 
 # Data Gen
 def random_email():
@@ -59,22 +59,27 @@ async def main():
             "cpf": random_cpf()
         })
         if res.status_code != 200:
-            print(f"Failed to create passenger profile: {res.text}")
-            return
+            if "already exists" in res.text:
+                 print("    Passenger Profile already exists (skipping creation)")
+                 res = await client.get(f"{BASE_URL}/passengers/me", headers=pass_headers)
+                 passenger = res.json()
+            else:
+                 print(f"Failed to create passenger profile: {res.text}")
+                 return
         passenger = res.json()
         print(f"    Passenger Profile Created: {passenger['id']}")
 
-        # 1.5 Topup Balance (Mock Webhook)
-        print("    [Finance] Adding Balance (Topup)...")
-        res = await client.post(f"{BASE_URL}/payments/webhook/mock", json={
-            "user_id": pass_user["id"],
-            "amount": 100.00,
-            "txid": f"sim_{uuid.uuid4().hex}"
-        })
-        if res.status_code != 200:
-            print(f"Failed to topup: {res.text}")
-            return
-        print(f"    Balance Added: R$ 100.00")
+        # 1.5 Topup Balance (Mock Webhook) - SKIPPED (Endpoint removed)
+        # print("    [Finance] Adding Balance (Topup)...")
+        # res = await client.post(f"{BASE_URL}/payments/webhook/mock", json={
+        #     "user_id": pass_user["id"],
+        #     "amount": 100.00,
+        #     "txid": f"sim_{uuid.uuid4().hex}"
+        # })
+        # if res.status_code != 200:
+        #     print(f"Failed to topup: {res.text}")
+        #     return
+        # print(f"    Balance Added: R$ 100.00")
 
         # 2. Driver Signup
         print("\n[2] Creating Driver...")
@@ -119,8 +124,13 @@ async def main():
             }
         })
         if res.status_code != 200:
-            print(f"Failed to create driver profile: {res.text}")
-            return
+            if "already exists" in res.text:
+                 print("    Driver Profile already exists (skipping creation)")
+                 res = await client.get(f"{BASE_URL}/drivers/me", headers=driver_headers)
+                 driver = res.json()
+            else:
+                 print(f"Failed to create driver profile: {res.text}")
+                 return
         driver = res.json()
         print(f"    Driver Profile Created: {driver['id']}")
         print(f"    Vehicle: {driver['vehicles'][0]['model']} ({driver['vehicles'][0]['license_plate']})")
@@ -154,6 +164,16 @@ async def main():
         ride = res.json()
         print(f"    Ride Accepted by: {driver['full_name']}")
         print(f"    Status: {ride['status']}")
+        
+        # 4.5 Driver Arriving
+        print("\n[4.5] Driver Arriving...")
+        res = await client.post(f"{BASE_URL}/rides/{ride_id}/arriving", headers=driver_headers)
+        if res.status_code != 200:
+            print(f"Failed to notify arrival: {res.text}")
+            return
+        ride_arriving = res.json()
+        print(f"    Status: {ride_arriving['status']}")
+        print(f"    ETA: {ride_arriving['eta_seconds']}s")
         
         # 5. Start Ride
         print("\n[5] Starting Ride...")

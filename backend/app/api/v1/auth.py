@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import timedelta, date
 from typing import Any
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
@@ -49,6 +49,17 @@ async def create_user_signup(
         )
     user = await create_user(db, user=user_in)
     
+    import random
+    import string
+
+    def random_digits(n):
+        return "".join(random.choices(string.digits, k=n))
+
+    def random_plate():
+        letters = "".join(random.choices(string.ascii_uppercase, k=3))
+        numbers = "".join(random.choices(string.digits, k=4))
+        return f"{letters}-{numbers}"
+
     # Auto-create profile based on user type
     if user.user_type == "passenger":
         from app.modules.passengers.models.passenger import Passenger
@@ -62,6 +73,49 @@ async def create_user_signup(
         db.add(passenger)
         await db.commit()
         await db.refresh(passenger)
+        
+    elif user.user_type == "driver":
+        from app.modules.drivers.models.driver import Driver, DriverOnlineStatus
+        from app.modules.drivers.models.vehicle import Vehicle
+        
+        # Generates random unique data
+        cpf_mock = f"{random_digits(3)}.{random_digits(3)}.{random_digits(3)}-{random_digits(2)}"
+        cnh_mock = random_digits(11)
+        
+        # Create Driver Placeholder
+        driver = Driver(
+            user_id=user.id,
+            full_name=user.email.split("@")[0].capitalize(),
+            email=user.email,
+            phone=user.phone or "0000000000",
+            cpf=cpf_mock,
+            cnh_number=cnh_mock,
+            cnh_category="B",
+            cnh_expiry_date=date(2030, 1, 1),
+            status="active",
+            online_status=DriverOnlineStatus.OFFLINE
+        )
+        db.add(driver)
+        await db.commit()
+        await db.refresh(driver)
+        
+        # Create Vehicle Placeholder
+        vehicle = Vehicle(
+            driver_id=driver.id,
+            license_plate=random_plate(),
+            renavam=random_digits(11),
+            model="Model X",
+            brand="Tesla",
+            color="White",
+            year=2023,
+            category="standard",
+            seats=4,
+            crlv_number=random_digits(12),
+            crlv_expiry_date=date(2030, 1, 1),
+            status="active"
+        )
+        db.add(vehicle)
+        await db.commit()
         
     return user
 

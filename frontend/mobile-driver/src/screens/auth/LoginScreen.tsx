@@ -27,7 +27,7 @@ export default function LoginScreen({ navigation }: any) {
 
         setLoading(true);
         try {
-            await login(email, password);
+            await login({ email, password });
             // Navigation is handled by RootNavigator/AuthState automatically
         } catch (error: any) {
             console.error(error);

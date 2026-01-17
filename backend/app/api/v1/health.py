@@ -43,7 +43,7 @@ async def readiness_check(response: Response):
 
     # 2. Redis Check
     try:
-        redis_url = f"redis://{settings.REDIS_HOST}:{settings.REDIS_PORT}"
+        redis_url = settings.REDIS_URL or f"redis://{settings.REDIS_HOST}:{settings.REDIS_PORT}"
         redis = aioredis.from_url(redis_url, socket_timeout=3)
         await redis.ping()
         await redis.close()

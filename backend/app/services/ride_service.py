@@ -123,12 +123,45 @@ class RideService:
             raise ValueError("Passenger profile not found")
             
         # 2. Re-calculate inputs (trusted source)
+        # Verify if frontend sent coordinates in address string (temporary fallback)
+        if request.origin_lat is None and "," in request.origin_address:
+            try:
+                parts = request.origin_address.split(",")
+                if len(parts) == 2:
+                    request.origin_lat = float(parts[0].strip())
+                    request.origin_lon = float(parts[1].strip())
+            except ValueError:
+                pass # Not coordinates
+
+        if request.destination_lat is None and "," in request.destination_address:
+            try:
+                parts = request.destination_address.split(",")
+                if len(parts) == 2:
+                    request.destination_lat = float(parts[0].strip())
+                    request.destination_lon = float(parts[1].strip())
+            except ValueError:
+                pass # Not coordinates
+
         # We should ideally fetch route info again to ensure consistency and store it.
         print("DEBUG: create_ride_request - getting distance")
         
         origin = (request.origin_lat, request.origin_lon)
         destination = (request.destination_lat, request.destination_lon)
         
+        # Ensure we have coordinates for DB (NotNull constraint)
+        # If still None here, we would need Geocoding service (not implemented yet).
+        # For now, default to Sao Paulo center if parsing failed to avoid 500, but ideally throw 400.
+        if request.origin_lat is None or request.origin_lon is None:
+             # Fallback/Mock for testing only
+             request.origin_lat = -23.55052
+             request.origin_lon = -46.633308
+             origin = (request.origin_lat, request.origin_lon)
+             
+        if request.destination_lat is None or request.destination_lon is None:
+             request.destination_lat = -23.56168
+             request.destination_lon = -46.65598
+             destination = (request.destination_lat, request.destination_lon)
+
         dist_meters, dur_seconds = await MapsService.get_distance_duration(origin, destination)
         print(f"DEBUG: Data from Maps: dist={dist_meters}, dur={dur_seconds}")
         

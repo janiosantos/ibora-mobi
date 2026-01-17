@@ -21,10 +21,10 @@ class Settings(BaseSettings):
     DATABASE_URL: Optional[str] = None
     
     POSTGRES_SERVER: str = "localhost"
-    POSTGRES_USER: str = "postgres"
-    POSTGRES_PASSWORD: str = "postgres_password"
-    POSTGRES_DB: str = "ibora_mobi"
-    POSTGRES_PORT: int = 5432
+    POSTGRES_USER: str = "ibora"
+    POSTGRES_PASSWORD: str = "ibora"
+    POSTGRES_DB: str = "ibora"
+    POSTGRES_PORT: int = 1332
     
     SQLALCHEMY_DATABASE_URI: Optional[str] = None
 

@@ -30,3 +30,405 @@
   "request_body": "{\"email\": \"bad-email\", \"password\": \"short\"}",
   "response_body": "{\"detail\":\"Not Found\"}"
 }
+2025-12-18 14:20:41,575 - INFO - {
+  "timestamp": "2025-12-18T14:20:41.575617",
+  "method": "POST",
+  "url": "http://localhost:8000/api/v1/auth/login/access-token",
+  "status_code": 422,
+  "process_time_ms": 1.94,
+  "request_headers": {
+    "host": "localhost:8000",
+    "user-agent": "curl/7.53.1",
+    "accept": "*/*",
+    "content-type": "application/json",
+    "content-length": "37"
+  },
+  "request_body": "{\"email\": \"bad\", \"password\": \"short\"}",
+  "response_body": "{\"detail\":[{\"type\":\"missing\",\"loc\":[\"body\",\"username\"],\"msg\":\"Field required\",\"input\":null,\"url\":\"https://errors.pydantic.dev/2.12/v/missing\"},{\"type\":\"missing\",\"loc\":[\"body\",\"password\"],\"msg\":\"Field required\",\"input\":null,\"url\":\"https://errors.pydantic.dev/2.12/v/missing\"}]}"
+}
+2025-12-18 14:21:20,089 - INFO - {
+  "timestamp": "2025-12-18T14:21:20.089362",
+  "method": "POST",
+  "url": "http://localhost:8000/api/v1/auth/login/access-token",
+  "status_code": 422,
+  "process_time_ms": 1.84,
+  "request_headers": {
+    "host": "localhost:8000",
+    "user-agent": "curl/7.53.1",
+    "accept": "*/*",
+    "content-type": "application/json",
+    "content-length": "37"
+  },
+  "request_body": "{\"email\": \"bad\", \"password\": \"short\"}",
+  "response_body": "{\"detail\":[{\"type\":\"missing\",\"loc\":[\"body\",\"username\"],\"msg\":\"Field required\",\"input\":null,\"url\":\"https://errors.pydantic.dev/2.12/v/missing\"},{\"type\":\"missing\",\"loc\":[\"body\",\"password\"],\"msg\":\"Field required\",\"input\":null,\"url\":\"https://errors.pydantic.dev/2.12/v/missing\"}]}"
+}
+2025-12-18 14:27:51,594 - INFO - {
+  "timestamp": "2025-12-18T14:27:51.594096",
+  "method": "POST",
+  "url": "/api/v1/auth/login/access-token",
+  "query_string": "",
+  "status_code": 422,
+  "process_time_ms": 72.12,
+  "request_body": "{\"email\": \"bad\", \"password\": \"short\"}",
+  "response_body": "{\"detail\":[{\"type\":\"missing\",\"loc\":[\"body\",\"username\"],\"msg\":\"Field required\",\"input\":null,\"url\":\"https://errors.pydantic.dev/2.12/v/missing\"},{\"type\":\"missing\",\"loc\":[\"body\",\"password\"],\"msg\":\"Field required\",\"input\":null,\"url\":\"https://errors.pydantic.dev/2.12/v/missing\"}]}"
+}
+2025-12-18 14:36:57,338 - INFO - {
+  "timestamp": "2025-12-18T14:36:57.338428",
+  "method": "POST",
+  "url": "/api/v1/auth/signup",
+  "query_string": "",
+  "status_code": 400,
+  "process_time_ms": 15.82,
+  "request_body": "{\"email\":\"ana@test.com\",\"password\":\"password123\",\"phone\":\"+5533998560249\",\"user_type\":\"passenger\"}",
+  "response_body": "{\"detail\":\"The user with this email already exists in the system.\"}"
+}
+2025-12-18 14:38:26,326 - INFO - {
+  "timestamp": "2025-12-18T14:38:26.325953",
+  "method": "POST",
+  "url": "/api/v1/rides/request",
+  "query_string": "",
+  "status_code": 500,
+  "process_time_ms": 24.8,
+  "request_body": "{\"origin_address\":\"-23.55052,-46.633308\",\"destination_address\":\"-23.56168,-46.65598\",\"estimated_price\":20,\"distance_km\":5,\"payment_method\":\"cash\"}",
+  "response_body": "{\"detail\":\"Internal Server Error: (sqlalchemy.dialects.postgresql.asyncpg.IntegrityError) <class 'asyncpg.exceptions.NotNullViolationError'>: null value in column \\\"origin_lat\\\" of relation \\\"rides\\\" violates not-null constraint\\nDETAIL:  Failing row contains (e2e8d8bb-a170-4587-a4ab-ce6e8757e9b8, 7c32fe21-280a-4fc5-a26d-99011fba4b86, null, null, null, null, -23.55052,-46.633308, null, null, -23.56168,-46.65598, 5.00, 10, 20.00, null, REQUESTED, 2025-12-18 17:38:26.30322+00, null, null, null, null, cash, pending, null, f, null).\\n[SQL: INSERT INTO rides (id, passenger_id, driver_id, vehicle_id, origin_lat, origin_lon, origin_address, destination_lat, destination_lon, destination_address, route_polyline, distance_km, duration_min, estimated_price, final_price, status, accepted_at, started_at, completed_at, cancelled_at, payment_method, payment_status, cash_confirmed_by_driver, cash_confirmed_at) VALUES ($1::UUID, $2::UUID, $3::UUID, $4::UUID, $5::NUMERIC(10, 8), $6::NUMERIC(11, 8), $7::VARCHAR, $8::NUMERIC(10, 8), $9::NUMERIC(11, 8), $10::VARCHAR, $11::VARCHAR, $12::NUMERIC(10, 2), $13::INTEGER, $14::NUMERIC(10, 2), $15::NUMERIC(10, 2), $16::VARCHAR, $17::TIMESTAMP WITH TIME ZONE, $18::TIMESTAMP WITH TIME ZONE, $19::TIMESTAMP WITH TIME ZONE, $20::TIMESTAMP WITH TIME ZONE, $21::VARCHAR, $22::VARCHAR, $23::BOOLEAN, $24::TIMESTAMP WITH TIME ZONE) RETURNING rides.created_at]\\n[parameters: (UUID('e2e8d8bb-a170-4587-a4ab-ce6e8757e9b8'), UUID('7c32fe21-280a-4fc5-a26d-99011fba4b86'), None, None, None, None, '-23.55052,-46.633308', None, None, '-23.56168,-46.65598', None, Decimal('5'), 10, Decimal('20.00'), None, 'REQUESTED', None, None, None, None, 'cash', 'pending', False, None)]\\n(Background on this error at: https://sqlalche.me/e/20/gkpj)\"}"
+}
+2025-12-18 14:38:46,604 - INFO - {
+  "timestamp": "2025-12-18T14:38:46.604253",
+  "method": "POST",
+  "url": "/api/v1/rides/request",
+  "query_string": "",
+  "status_code": 500,
+  "process_time_ms": 10.51,
+  "request_body": "{\"origin_address\":\"-23.55052,-46.633308\",\"destination_address\":\"-23.56168,-46.65598\",\"estimated_price\":20,\"distance_km\":5,\"payment_method\":\"cash\"}",
+  "response_body": "{\"detail\":\"Internal Server Error: (sqlalchemy.dialects.postgresql.asyncpg.IntegrityError) <class 'asyncpg.exceptions.NotNullViolationError'>: null value in column \\\"origin_lat\\\" of relation \\\"rides\\\" violates not-null constraint\\nDETAIL:  Failing row contains (e45645bb-b8c5-4920-ac50-db94ce830bcb, 7c32fe21-280a-4fc5-a26d-99011fba4b86, null, null, null, null, -23.55052,-46.633308, null, null, -23.56168,-46.65598, 5.00, 10, 20.00, null, REQUESTED, 2025-12-18 17:38:46.596318+00, null, null, null, null, cash, pending, null, f, null).\\n[SQL: INSERT INTO rides (id, passenger_id, driver_id, vehicle_id, origin_lat, origin_lon, origin_address, destination_lat, destination_lon, destination_address, route_polyline, distance_km, duration_min, estimated_price, final_price, status, accepted_at, started_at, completed_at, cancelled_at, payment_method, payment_status, cash_confirmed_by_driver, cash_confirmed_at) VALUES ($1::UUID, $2::UUID, $3::UUID, $4::UUID, $5::NUMERIC(10, 8), $6::NUMERIC(11, 8), $7::VARCHAR, $8::NUMERIC(10, 8), $9::NUMERIC(11, 8), $10::VARCHAR, $11::VARCHAR, $12::NUMERIC(10, 2), $13::INTEGER, $14::NUMERIC(10, 2), $15::NUMERIC(10, 2), $16::VARCHAR, $17::TIMESTAMP WITH TIME ZONE, $18::TIMESTAMP WITH TIME ZONE, $19::TIMESTAMP WITH TIME ZONE, $20::TIMESTAMP WITH TIME ZONE, $21::VARCHAR, $22::VARCHAR, $23::BOOLEAN, $24::TIMESTAMP WITH TIME ZONE) RETURNING rides.created_at]\\n[parameters: (UUID('e45645bb-b8c5-4920-ac50-db94ce830bcb'), UUID('7c32fe21-280a-4fc5-a26d-99011fba4b86'), None, None, None, None, '-23.55052,-46.633308', None, None, '-23.56168,-46.65598', None, Decimal('5'), 10, Decimal('20.00'), None, 'REQUESTED', None, None, None, None, 'cash', 'pending', False, None)]\\n(Background on this error at: https://sqlalche.me/e/20/gkpj)\"}"
+}
+2025-12-18 15:00:14,653 - INFO - {
+  "timestamp": "2025-12-18T15:00:14.653417",
+  "method": "POST",
+  "url": "/api/v1/auth/signup",
+  "query_string": "",
+  "status_code": 422,
+  "process_time_ms": 10.81,
+  "request_body": "{\"email\":\"user_9bcda5c8@example.com1\",\"password\":\"123456\",\"phone\":\"+5533991735828\",\"user_type\":\"driver\"}",
+  "response_body": "{\"detail\":[{\"type\":\"value_error\",\"loc\":[\"body\",\"email\"],\"msg\":\"value is not a valid email address: The part after the @-sign is not valid. It is not within a valid top-level domain.\",\"input\":\"user_9bcda5c8@example.com1\",\"ctx\":{\"reason\":\"The part after the @-sign is not valid. It is not within a valid top-level domain.\"}}]}"
+}
+2025-12-18 15:01:30,157 - INFO - {
+  "timestamp": "2025-12-18T15:01:30.157727",
+  "method": "POST",
+  "url": "/api/v1/auth/signup",
+  "query_string": "",
+  "status_code": 422,
+  "process_time_ms": 4.28,
+  "request_body": "{\"email\":\"driver@mail.local\",\"password\":\"12345678\",\"phone\":\"1212344321\",\"user_type\":\"driver\"}",
+  "response_body": "{\"detail\":[{\"type\":\"value_error\",\"loc\":[\"body\",\"email\"],\"msg\":\"value is not a valid email address: The part after the @-sign is a special-use or reserved name that cannot be used with email.\",\"input\":\"driver@mail.local\",\"ctx\":{\"reason\":\"The part after the @-sign is a special-use or reserved name that cannot be used with email.\"}}]}"
+}
+2025-12-18 15:09:19,151 - INFO - {
+  "timestamp": "2025-12-18T15:09:19.151132",
+  "method": "POST",
+  "url": "/api/v1/auth/login/access-token",
+  "query_string": "",
+  "status_code": 400,
+  "process_time_ms": 8.99,
+  "request_body": "username=undefined&password=undefined",
+  "response_body": "{\"detail\":\"Incorrect email or password\"}"
+}
+2025-12-18 15:11:12,748 - INFO - {
+  "timestamp": "2025-12-18T15:11:12.748660",
+  "method": "GET",
+  "url": "/api/v1/drivers/me",
+  "query_string": "",
+  "status_code": 401,
+  "process_time_ms": 1.07,
+  "request_body": "",
+  "response_body": "{\"detail\":\"Not authenticated\"}"
+}
+2025-12-18 15:11:32,919 - INFO - {
+  "timestamp": "2025-12-18T15:11:32.919872",
+  "method": "GET",
+  "url": "/api/v1/drivers/me",
+  "query_string": "",
+  "status_code": 401,
+  "process_time_ms": 1.79,
+  "request_body": "",
+  "response_body": "{\"detail\":\"Not authenticated\"}"
+}
+2025-12-18 15:11:56,024 - INFO - {
+  "timestamp": "2025-12-18T15:11:56.024419",
+  "method": "GET",
+  "url": "/api/v1/drivers/me",
+  "query_string": "",
+  "status_code": 401,
+  "process_time_ms": 1.04,
+  "request_body": "",
+  "response_body": "{\"detail\":\"Not authenticated\"}"
+}
+2025-12-18 15:12:17,882 - INFO - {
+  "timestamp": "2025-12-18T15:12:17.882430",
+  "method": "GET",
+  "url": "/api/v1/drivers/me",
+  "query_string": "",
+  "status_code": 401,
+  "process_time_ms": 0.97,
+  "request_body": "",
+  "response_body": "{\"detail\":\"Not authenticated\"}"
+}
+2025-12-18 15:20:00,712 - INFO - {
+  "timestamp": "2025-12-18T15:20:00.712431",
+  "method": "GET",
+  "url": "/api/v1/drivers/me",
+  "query_string": "",
+  "status_code": 404,
+  "process_time_ms": 24.99,
+  "request_body": "",
+  "response_body": "{\"detail\":\"Driver profile not found\"}"
+}
+2025-12-18 15:23:39,977 - INFO - {
+  "timestamp": "2025-12-18T15:23:39.976903",
+  "method": "POST",
+  "url": "/api/v1/auth/signup",
+  "query_string": "",
+  "status_code": 400,
+  "process_time_ms": 7.34,
+  "request_body": "{\"email\":\"driver2@mail.local\",\"password\":\"123456\",\"phone\":\"1234567899\",\"user_type\":\"driver\"}",
+  "response_body": "{\"detail\":\"The user with this email already exists in the system.\"}"
+}
+2025-12-18 15:24:04,598 - INFO - {
+  "timestamp": "2025-12-18T15:24:04.598327",
+  "method": "GET",
+  "url": "/api/v1/drivers/me",
+  "query_string": "",
+  "status_code": 404,
+  "process_time_ms": 19.56,
+  "request_body": "",
+  "response_body": "{\"detail\":\"Driver profile not found\"}"
+}
+2025-12-18 19:52:47,895 - INFO - {
+  "timestamp": "2025-12-18T19:52:47.895378",
+  "method": "GET",
+  "url": "/api/v1/drivers/me",
+  "query_string": "",
+  "status_code": 401,
+  "process_time_ms": 6.66,
+  "request_body": "",
+  "response_body": "{\"detail\":\"Not authenticated\"}"
+}
+2025-12-22 09:53:52,898 - INFO - {
+  "timestamp": "2025-12-22T09:53:52.897190",
+  "method": "POST",
+  "url": "/api/v1/auth/login/access-token",
+  "query_string": "",
+  "status_code": 400,
+  "process_time_ms": 406.38,
+  "request_body": "username=janjaniojanio%40mail.com&password=testetrestrete",
+  "response_body": "{\"detail\":\"Incorrect email or password\"}"
+}
+2025-12-22 09:54:09,668 - INFO - {
+  "timestamp": "2025-12-22T09:54:09.668658",
+  "method": "GET",
+  "url": "/",
+  "query_string": "",
+  "status_code": 404,
+  "process_time_ms": 3.93,
+  "request_body": "",
+  "response_body": "{\"detail\":\"Not Found\"}"
+}
+2025-12-22 09:54:09,787 - INFO - {
+  "timestamp": "2025-12-22T09:54:09.787082",
+  "method": "GET",
+  "url": "/favicon.ico",
+  "query_string": "",
+  "status_code": 404,
+  "process_time_ms": 2.15,
+  "request_body": "",
+  "response_body": "{\"detail\":\"Not Found\"}"
+}
+2025-12-22 09:55:33,340 - INFO - {
+  "timestamp": "2025-12-22T09:55:33.340539",
+  "method": "GET",
+  "url": "/",
+  "query_string": "",
+  "status_code": 404,
+  "process_time_ms": 1.47,
+  "request_body": "",
+  "response_body": "{\"detail\":\"Not Found\"}"
+}
+2025-12-22 09:55:33,903 - INFO - {
+  "timestamp": "2025-12-22T09:55:33.903855",
+  "method": "GET",
+  "url": "/favicon.ico",
+  "query_string": "",
+  "status_code": 404,
+  "process_time_ms": 2.26,
+  "request_body": "",
+  "response_body": "{\"detail\":\"Not Found\"}"
+}
+2025-12-22 10:05:55,191 - INFO - {
+  "timestamp": "2025-12-22T10:05:55.190990",
+  "method": "GET",
+  "url": "/api/v1",
+  "query_string": "",
+  "status_code": 404,
+  "process_time_ms": 8.61,
+  "request_body": "",
+  "response_body": "{\"detail\":\"Not Found\"}"
+}
+2025-12-22 10:05:55,256 - INFO - {
+  "timestamp": "2025-12-22T10:05:55.256798",
+  "method": "GET",
+  "url": "/favicon.ico",
+  "query_string": "",
+  "status_code": 404,
+  "process_time_ms": 1.54,
+  "request_body": "",
+  "response_body": "{\"detail\":\"Not Found\"}"
+}
+2025-12-22 10:18:00,761 - INFO - {
+  "timestamp": "2025-12-22T10:18:00.761810",
+  "method": "POST",
+  "url": "/api/v1/auth/signup",
+  "query_string": "",
+  "status_code": 400,
+  "process_time_ms": 192.68,
+  "request_body": "{\"email\":\"janio.santos@outlook.com\",\"password\":\"123456\",\"phone\":\"1243211239\",\"user_type\":\"driver\"}",
+  "response_body": "{\"detail\":\"The user with this email already exists in the system.\"}"
+}
+2026-01-17 20:49:54,218 - INFO - {
+  "timestamp": "2026-01-17T20:49:54.218572",
+  "method": "GET",
+  "url": "/health/ready",
+  "query_string": "",
+  "status_code": 503,
+  "process_time_ms": 8.95,
+  "request_body": "",
+  "response_body": "{\"status\":\"not_ready\",\"components\":{\"postgres\":\"up\",\"redis\":\"down: Error 111 connecting to localhost:1379. Connection refused.\",\"rabbitmq\":\"down: [Errno 111] Connection refused\"}}"
+}
+2026-01-17 20:50:35,002 - INFO - {
+  "timestamp": "2026-01-17T20:50:35.002742",
+  "method": "GET",
+  "url": "/health/ready",
+  "query_string": "",
+  "status_code": 503,
+  "process_time_ms": 41.06,
+  "request_body": "",
+  "response_body": "{\"status\":\"not_ready\",\"components\":{\"postgres\":\"up\",\"redis\":\"up\",\"rabbitmq\":\"down: [Errno 111] Connection refused\"}}"
+}
+2026-01-17 20:58:13,410 - INFO - {
+  "timestamp": "2026-01-17T20:58:13.410713",
+  "method": "POST",
+  "url": "/api/v1/passengers/",
+  "query_string": "",
+  "status_code": 400,
+  "process_time_ms": 8.88,
+  "request_body": "{\"full_name\": \"John Doe Passenger\", \"phone\": \"02769170685\", \"cpf\": \"15192046926\"}",
+  "response_body": "{\"detail\":\"Passenger profile already exists\"}"
+}
+2026-01-17 20:58:52,428 - INFO - {
+  "timestamp": "2026-01-17T20:58:52.428244",
+  "method": "POST",
+  "url": "/api/v1/passengers/",
+  "query_string": "",
+  "status_code": 400,
+  "process_time_ms": 9.33,
+  "request_body": "{\"full_name\": \"John Doe Passenger\", \"phone\": \"94044220718\", \"cpf\": \"78175029857\"}",
+  "response_body": "{\"detail\":\"Passenger profile already exists\"}"
+}
+2026-01-17 20:58:52,439 - INFO - {
+  "timestamp": "2026-01-17T20:58:52.439411",
+  "method": "POST",
+  "url": "/api/v1/payments/webhook/mock",
+  "query_string": "",
+  "status_code": 404,
+  "process_time_ms": 1.41,
+  "request_body": "",
+  "response_body": "{\"detail\":\"Not Found\"}"
+}
+2026-01-17 21:00:01,267 - INFO - {
+  "timestamp": "2026-01-17T21:00:01.267462",
+  "method": "POST",
+  "url": "/api/v1/passengers/",
+  "query_string": "",
+  "status_code": 400,
+  "process_time_ms": 8.4,
+  "request_body": "{\"full_name\": \"John Doe Passenger\", \"phone\": \"03363534144\", \"cpf\": \"39495009241\"}",
+  "response_body": "{\"detail\":\"Passenger profile already exists\"}"
+}
+2026-01-17 21:00:01,770 - INFO - {
+  "timestamp": "2026-01-17T21:00:01.770875",
+  "method": "POST",
+  "url": "/api/v1/drivers/",
+  "query_string": "",
+  "status_code": 400,
+  "process_time_ms": 16.7,
+  "request_body": "{\"full_name\": \"Jane Driver\", \"cpf\": \"47191501284\", \"phone\": \"84026426960\", \"cnh_number\": \"47553173519\", \"cnh_category\": \"B\", \"cnh_expiry_date\": \"2030-01-01\", \"vehicle\": {\"license_plate\": \"XYI3983\", \"brand\": \"Toyota\", \"model\": \"Corolla\", \"year\": 2022, \"color\": \"White\"}}",
+  "response_body": "{\"detail\":\"Driver profile already exists\"}"
+}
+2026-01-17 21:00:01,804 - INFO - {
+  "timestamp": "2026-01-17T21:00:01.804594",
+  "method": "POST",
+  "url": "/api/v1/rides/request",
+  "query_string": "",
+  "status_code": 500,
+  "process_time_ms": 20.4,
+  "request_body": "{\"origin_lat\": -23.55052, \"origin_lon\": -46.633308, \"origin_address\": \"Pra\\u00e7a da S\\u00e9, SP\", \"destination_lat\": -23.559616, \"destination_lon\": -46.658755, \"destination_address\": \"Av. Paulista, SP\", \"payment_method\": \"pix\"}",
+  "response_body": "{\"detail\":\"Internal Server Error: (sqlalchemy.dialects.postgresql.asyncpg.ProgrammingError) <class 'asyncpg.exceptions.UndefinedColumnError'>: column \\\"cash_confirmed_by_driver\\\" of relation \\\"rides\\\" does not exist\\n[SQL: INSERT INTO rides (id, passenger_id, driver_id, vehicle_id, origin_lat, origin_lon, origin_address, destination_lat, destination_lon, destination_address, route_polyline, distance_km, duration_min, estimated_price, final_price, status, accepted_at, started_at, completed_at, cancelled_at, payment_method, payment_status, cash_confirmed_by_driver, cash_confirmed_at) VALUES ($1::UUID, $2::UUID, $3::UUID, $4::UUID, $5::NUMERIC(10, 8), $6::NUMERIC(11, 8), $7::VARCHAR, $8::NUMERIC(10, 8), $9::NUMERIC(11, 8), $10::VARCHAR, $11::VARCHAR, $12::NUMERIC(10, 2), $13::INTEGER, $14::NUMERIC(10, 2), $15::NUMERIC(10, 2), $16::VARCHAR, $17::TIMESTAMP WITH TIME ZONE, $18::TIMESTAMP WITH TIME ZONE, $19::TIMESTAMP WITH TIME ZONE, $20::TIMESTAMP WITH TIME ZONE, $21::VARCHAR, $22::VARCHAR, $23::BOOLEAN, $24::TIMESTAMP WITH TIME ZONE) RETURNING rides.created_at]\\n[parameters: (UUID('6b29ecc6-25ba-4d96-8166-d8212f966c6e'), UUID('41f1353f-e3cd-495b-8b23-17cd9cb7ce59'), None, None, -23.55052, -46.633308, 'Pra\u00e7a da S\u00e9, SP', -23.559616, -46.658755, 'Av. Paulista, SP', None, Decimal('5'), 10, Decimal('20.00'), None, 'REQUESTED', None, None, None, None, 'pix', 'pending', False, None)]\\n(Background on this error at: https://sqlalche.me/e/20/f405)\"}"
+}
+2026-01-17 21:01:14,056 - INFO - {
+  "timestamp": "2026-01-17T21:01:14.056165",
+  "method": "POST",
+  "url": "/api/v1/passengers/",
+  "query_string": "",
+  "status_code": 400,
+  "process_time_ms": 8.42,
+  "request_body": "{\"full_name\": \"John Doe Passenger\", \"phone\": \"20155903877\", \"cpf\": \"61366735818\"}",
+  "response_body": "{\"detail\":\"Passenger profile already exists\"}"
+}
+2026-01-17 21:04:43,988 - INFO - {
+  "timestamp": "2026-01-17T21:04:43.988015",
+  "method": "POST",
+  "url": "/api/v1/passengers/",
+  "query_string": "",
+  "status_code": 400,
+  "process_time_ms": 7.94,
+  "request_body": "{\"full_name\": \"John Doe Passenger\", \"phone\": \"06728767616\", \"cpf\": \"94602220707\"}",
+  "response_body": "{\"detail\":\"Passenger profile already exists\"}"
+}
+2026-01-17 21:04:44,494 - INFO - {
+  "timestamp": "2026-01-17T21:04:44.494855",
+  "method": "POST",
+  "url": "/api/v1/drivers/",
+  "query_string": "",
+  "status_code": 400,
+  "process_time_ms": 13.23,
+  "request_body": "{\"full_name\": \"Jane Driver\", \"cpf\": \"58407057810\", \"phone\": \"71876175651\", \"cnh_number\": \"63624022002\", \"cnh_category\": \"B\", \"cnh_expiry_date\": \"2030-01-01\", \"vehicle\": {\"license_plate\": \"TSZ1296\", \"brand\": \"Toyota\", \"model\": \"Corolla\", \"year\": 2022, \"color\": \"White\"}}",
+  "response_body": "{\"detail\":\"Driver profile already exists\"}"
+}
+2026-01-17 21:04:44,634 - INFO - {
+  "timestamp": "2026-01-17T21:04:44.634943",
+  "method": "POST",
+  "url": "/api/v1/rides/05716f84-816a-47a4-b4f2-571c0985a956/start",
+  "query_string": "",
+  "status_code": 400,
+  "process_time_ms": 4.7,
+  "request_body": "",
+  "response_body": "{\"detail\":\"Invalid state transition from ACCEPTED to IN_PROGRESS\"}"
+}
+2026-01-17 21:06:00,136 - INFO - {
+  "timestamp": "2026-01-17T21:06:00.136711",
+  "method": "POST",
+  "url": "/api/v1/passengers/",
+  "query_string": "",
+  "status_code": 400,
+  "process_time_ms": 7.45,
+  "request_body": "{\"full_name\": \"John Doe Passenger\", \"phone\": \"96937917219\", \"cpf\": \"02869499308\"}",
+  "response_body": "{\"detail\":\"Passenger profile already exists\"}"
+}
+2026-01-17 21:06:00,628 - INFO - {
+  "timestamp": "2026-01-17T21:06:00.628712",
+  "method": "POST",
+  "url": "/api/v1/drivers/",
+  "query_string": "",
+  "status_code": 400,
+  "process_time_ms": 9.43,
+  "request_body": "{\"full_name\": \"Jane Driver\", \"cpf\": \"09105613366\", \"phone\": \"74674641721\", \"cnh_number\": \"74562709194\", \"cnh_category\": \"B\", \"cnh_expiry_date\": \"2030-01-01\", \"vehicle\": {\"license_plate\": \"QOC0970\", \"brand\": \"Toyota\", \"model\": \"Corolla\", \"year\": 2022, \"color\": \"White\"}}",
+  "response_body": "{\"detail\":\"Driver profile already exists\"}"
+}

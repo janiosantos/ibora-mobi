@@ -1,0 +1,58 @@
+{
+  "expo": {
+    "name": "iBora Motorista",
+    "slug": "ibora-driver",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./src/assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./src/assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#5B51FF"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.ibora.driver",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "iBora precisa da sua localização para conectar você aos passageiros.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "iBora precisa da sua localização em segundo plano para corridas em andamento.",
+        "NSCameraUsageDescription": "iBora precisa acessar sua câmera para verificação de documentos."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./src/assets/adaptive-icon.png",
+        "backgroundColor": "#5B51FF"
+      },
+      "package": "com.ibora.driver",
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "CAMERA",
+        "VIBRATE"
+      ]
+    },
+    "web": {
+      "favicon": "./src/assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow iBora to use your location."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./src/assets/notification-icon.png",
+          "color": "#5B51FF"
+        }
+      ]
+    ]
+  }
+}

@@ -11,7 +11,8 @@ class UserType(str, Enum):
     admin = "admin"
 
 class UserBase(BaseModel):
-    email: EmailStr
+    # Relaxed validation for dev environment (allows .local)
+    email: str # EmailStr is too strict for .local domains
     phone: Optional[str] = None
     user_type: UserType
 

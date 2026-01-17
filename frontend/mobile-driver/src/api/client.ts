@@ -38,7 +38,7 @@ class ApiClient {
         // Request interceptor - add auth token
         this.client.interceptors.request.use(
             async (config) => {
-                const token = await AsyncStorage.getItem('access_token');
+                const token = await AsyncStorage.getItem('driver_token');
                 if (token) {
                     config.headers.Authorization = `Bearer ${token}`;
                 }

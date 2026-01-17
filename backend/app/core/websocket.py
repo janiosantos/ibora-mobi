@@ -16,7 +16,7 @@ class ConnectionManager:
         self.user_roles: Dict[str, str] = {}
         
         # Redis Pub/Sub for distributed broadcasting
-        self.redis_url = f"redis://{settings.REDIS_HOST}:{settings.REDIS_PORT}"
+        self.redis_url = settings.REDIS_URL or f"redis://{settings.REDIS_HOST}:{settings.REDIS_PORT}"
         self.pubsub_client = None
 
     async def connect(self, websocket: WebSocket, user_id: str, role: str):

@@ -42,6 +42,8 @@ db_url = os.getenv("DATABASE_URL")
 if not db_url:
     db_url = settings.SQLALCHEMY_DATABASE_URI
 config.set_main_option("sqlalchemy.url", db_url)
+import sys
+print(f"DEBUG: Using DATABASE_URL: {db_url}", file=sys.stderr)
 
 # target_metadata is your Base.metadata
 target_metadata = Base.metadata
